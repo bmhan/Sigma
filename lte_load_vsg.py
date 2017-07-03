@@ -3,6 +3,7 @@
 # Purpose:     Example IQxstream Python Application
 #
 # Created:     05/15/2017
+# Updated:     07/2/2017
 # Copyright:   (c) Litepoint 2017
 # Licence:     All rights reserved
 # -------------------------------------------------------------------------------
