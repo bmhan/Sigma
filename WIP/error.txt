@@ -1,0 +1,1003 @@
+LitePoint,IQxstream,IQXS34783,1.38.0
+CMD >> VSA; MRST; VSG; MRST; ROUT; MRST; LTE; MRST; CHAN1; CRST; *WAI; SYST:ERR:ALL?
+RET << 0,"No error";
+CMD >> ROUT; PORT:RES:ADD RF1A, VSA
+CMD >> ROUT; PORT:RES:ADD RF1A, VSG
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 29
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << 0,"No error";
+Capture status 0,"No error";
+
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.2918209e+001,-2.5279319e+003,1.8003355e+002,6.8517120e+002,1.9973531e+002,2.1387742e+003,-4.5137435e-002,6.6988073e-002;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 32.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 31.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 30.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 29.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 28.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 27.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 26.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 25.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 24.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 23.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 22.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 21.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 20.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 19.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 18.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 17.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 16.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 15.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 14.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-2.5452515e+001,5.0090494e+000,9.3853226e+001,3.3816113e+002,9.8543808e+001,1.9212220e+003,1.1054318e-001,-8.0450821e-001;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 13.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 12.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 11.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 10.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 9.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 8.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-5.0606491e+001,-6.0645938e+000,1.2184659e+002,5.1031152e+002,1.5540565e+002,1.0280276e+003,1.5289263e-001,-1.0240606e+000;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 7.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 6.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.4120110e+001,-1.6723095e+001,7.7700470e+001,4.5959430e+002,1.3441899e+002,1.9085192e+003,3.0435029e-001,6.6549115e-002;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 5.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-2.7579641e+001,-4.2439685e+000,8.9691711e+001,3.0840875e+002,5.7536880e+001,3.8840768e+002,1.0603245e-001,6.9778371e-001;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 4.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 3.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-4.2863129e+001,-3.1936383e+000,8.8228203e+001,3.3512003e+002,6.4768158e+001,5.1702087e+002,-1.6056971e-001,-3.9133081e-001;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 2.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.4207016e+001,-1.7132690e+001,1.1601342e+002,4.4570782e+002,1.2231723e+002,1.2840498e+003,-4.1335282e-001,1.6638428e-001;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 1.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 0.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.3089378e+001,5.5102669e+001,1.4705452e+002,6.4000482e+002,3.2792957e+002,5.4632261e+003,2.8711054e+000,-1.0209419e+000;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -1.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -2.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.4879356e+001,1.1017774e+001,5.3187065e+000,2.0183908e+001,2.2877821e+002,1.3285461e+002,3.5582936e-001,-4.2868853e-002;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -3.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.7729103e+001,-1.7717951e+001,4.5278521e+000,1.8797890e+001,8.2515617e+001,2.8295315e+001,-2.0220786e-002,7.5787404e-003;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -4.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-5.1177727e+001,4.5489993e+000,2.1325312e+001,5.1352337e+001,6.6304913e+002,1.0483791e+002,3.2421830e-001,-3.7893769e-001;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -5.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -6.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-221,"Settings conflict; 01:01:0027001D; LTE; CHAN1; CALC:TXQ 0,1; License not installed for operation";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-221,"Settings conflict; 01:01:0027001D; LTE; CHAN1; CALC:TXQ 0,1; License not installed for operation";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -7.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-221,"Settings conflict; 01:01:0027001D; LTE; CHAN1; CALC:TXQ 0,1; License not installed for operation";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-221,"Settings conflict; 01:01:0027001D; LTE; CHAN1; CALC:TXQ 0,1; License not installed for operation";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.2759830e+001,2.1031546e+001,1.7074648e+002,5.5278125e+002,1.3683110e+002,1.5903522e+003,2.3266282e+000,1.2490052e+000;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -8.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.2338760e+001,2.9829372e+001,4.2773976e+000,1.5436958e+001,6.7318398e+001,7.0676735e+001,-6.6348962e-002,1.1443373e+000;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -9.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-4.2357929e+001,-6.8025231e+000,8.9052246e+001,3.2490210e+002,9.7503273e+001,6.4770569e+002,2.0698234e-001,1.1696974e+000;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -10.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -11.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-5.0906376e+001,6.0002737e+000,3.2467008e+000,1.1611710e+001,7.0032852e+001,4.2041298e+001,-1.0433105e-001,-1.3068055e-001;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -12.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -13.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -14.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -15.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -16.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -17.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -18.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.2481380e+001,-1.3582028e+001,4.2120090e+000,1.5430843e+001,9.9848473e+001,1.8645363e+001,2.0732206e-001,1.5199299e+000;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -19.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -20.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -21.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.5652687e+001,-1.9153864e+000,4.7155280e+000,1.6685135e+001,1.3718991e+002,1.2748458e+001,4.8469044e-002,8.5031861e-001;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -22.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -23.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.5745667e+001,-6.7267413e+000,1.2676640e+002,4.9301953e+002,2.7981003e+002,6.4121240e+002,-1.0438606e-001,1.2760800e+000;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -24.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -25.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -26.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -27.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -28.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -29.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -30.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -31.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -32.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -33.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -34.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-4.5328770e+001,-2.5862136e+000,3.4761636e+000,1.3322783e+001,5.2215134e+001,1.4498153e+001,1.2484627e-001,-2.9891750e-002;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -35.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-4.2997433e+001,3.1588028e+001,4.0710602e+000,1.4528633e+001,4.3483513e+001,2.7484142e+001,1.0047262e-002,1.1095346e+000;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -36.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -37.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -38.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -39.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.1928507e+001,1.3305283e+001,4.2333897e+001,1.5860641e+002,8.5850342e+001,3.1683585e+002,-8.4715135e-002,1.0632067e+000;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -40.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -41.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-4.6785522e+001,-2.1036217e+001,3.1991334e+000,1.3111863e+001,5.2362072e+001,1.1174300e+002,-2.0364290e-003,1.2514977e+000;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -42.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status 
+-222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -43.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-5.4213249e+001,-1.2955304e+000,6.3648658e+000,2.2383545e+001,1.8149739e+002,3.1857258e+001,-2.0947833e-002,-1.2263932e-001;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -44.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV -45.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << 0,-3.5880371e+001,9.9019156e+000,7.0529526e+001,2.4532353e+002,8.8389305e+001,6.3401685e+002,-5.1108259e-001,-4.5002842e-001;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1710000000.0
+CMD >> RLEV 29.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1747500000.0
+CMD >> RLEV 29.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
+CMD >> VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms
+CMD >> VSA; FREQ 1785000000.0
+CMD >> RLEV 29.0
+CMD >> VSA; INIT
+CMD >> *WAI; SYST:ERR:ALL?
+RET << -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+Capture status -222,"Data out of range; 01:01:00000035; LTE; CHAN1; CALC:POW 0,1",-200,"Execution error; 01:01:001C0004; LTE; CHAN1; CALC:TXQ 0,1; Signal acquisition failed: 1",-200,"Execution error; 01:01:001C0007; LTE; CHAN1; CALC:TXQ 0,1; Signal analysis failed: 1";
+CMD >> LTE; CLE:ALL; CALC:POW 0,1; CALC:TXQ 0,1
+CMD >> FETC:POW:AVER?
+RET << -1,9.91E+37;
+CMD >> FETC:TXQ:AVER?
+RET << -21,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37,9.91E+37;
