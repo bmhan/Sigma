@@ -1,0 +1,22 @@
+#Notes on the sample code files
+
+4 methods:
+        measure_tx
+        play_waveform
+        setup_vsg
+        main
+
+Missing function: 
+        dut_start_tx
+        //
+        DUT Control function w/ frequency and power_level
+        //
+Need to pipe output of the sample code to an error file
+Figure out how to do that. Also, make sure the error measures are from the
+original, unedited sample code file (not your calibration file).
+
+overloaded "send" will return a value if there is a "?" mark, indicating that we
+will expect a return value. Following the send.
+
+Need to encapsulate the reconfiguration into a setup method, because of overuse
+throughout the code.
