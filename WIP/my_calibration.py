@@ -1,20 +1,35 @@
-# -------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Name:        LTE_Waveform_Loading
 # Purpose:     Example IQxstream Python Application
 #
-# Created:     05/18/2017
-# Copyright:   (c) Litepoint 2017
-# Licence:     All rights reserved
-# -------------------------------------------------------------------------------
+# Created:     7/11/2017
+#
+#
+# my_calibration.py is based on the sample_tx_rx_calibration.py sample code,
+# and uses the socket_interface.py code to perform a series of 4 tests. The 
+# program currently uses two RF ports to produce and analyze a signal. The
+# "TODO" functionality is for programming for the DUT.
+# -----------------------------------------------------------------------------
 import socket_interface as scpi
+
 
 HOST = '10.10.14.202'
 PORT = 24000
 
 
+
+"""
+Function returns a dictionary of information on a given signal.
+params:
+    freq - The frequency of the VSA
+    reference_level - The reference level of VSA
+return: 
+    Dictionary of information 
+"""
 def measure_tx(freq, reference_level):
     # setup VSA, this can be done just once per signal type
-    scpi.send('VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms')  # assuming immediate trigger at the moment
+    # assuming immediate trigger at the moment
+    scpi.send('VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms')  
 
     # setup freq and ref. level
     scpi.send('VSA; FREQ ' + str(freq))
@@ -45,6 +60,12 @@ def measure_tx(freq, reference_level):
     return result_dict
 
 
+
+"""
+Function plays a .iqvsg file as the VSG
+param:
+    waveform_file - The nameof the waveform file to play
+"""
 def play_waveform(waveform_file):
     # enable port RF1A with VSG
    
@@ -54,6 +75,13 @@ def play_waveform(waveform_file):
     print ("Status: ", ret)
 
 
+
+"""
+Function setups the vsg
+param:
+    frequency - frequency to set the VSG
+    power - power to set the VSG
+"""
 def setup_vsg(frequency, power):
     scpi.send('VSG; FREQ ' + str(frequency))
     scpi.send('POW:LEV ' + str(power))
@@ -61,8 +89,11 @@ def setup_vsg(frequency, power):
     print ("Status: ", ret)
 
 
-def main():
-    # this is a simple conceptual calibration procedure
+
+"""
+Function sets up socket connection to the IQxstream
+"""
+def setup_connection ():
     scpi.init(HOST, PORT)
     scpi.send('VSA; MRST; VSG; MRST; ROUT; MRST; LTE; MRST; CHAN1; CRST; *WAI; SYST:ERR:ALL?')
 
@@ -75,6 +106,19 @@ def main():
     scpi.send('ROUT; PORT:RES:ADD ' + vsa_port + ', VSA')
     scpi.send('ROUT; PORT:RES:ADD ' + vsg_port + ', VSG')
 
+
+
+"""
+Main method performs 4 tests
+    1) Measures the frequency error 
+    2) Sweep power levels
+    3) Sweep power vs. frequency
+    4) RX calibration over level (or frequency)
+"""
+def main():
+    # this is a simple conceptual calibration procedure
+    setup_connection()
+
     # 1st - measure frequency error
     freq = 1747.5e6
 
@@ -83,7 +127,6 @@ def main():
     freq_err = tx_results['Average_Frequency_Offset']
 
     # TODO: calculate and correct frequency error
-    '''
     # 2nd - sweep power levels
     sweep_power_levels = range(23, -55, -1)
     power_offset = {}
@@ -91,17 +134,8 @@ def main():
     for power_level in sweep_power_levels:
         # TODO: insert DUT control, dut_start_tx(freq, power_level)
         
-        scpi.init(HOST, PORT)
-        scpi.send('VSA; MRST; VSG; MRST; ROUT; MRST; LTE; MRST; CHAN1; CRST; *WAI; SYST:ERR:ALL?')
+        setup_connection()
 
-        vsg_port = 'STRM1A'
-        vsa_port = 'RF4A'
-	
-        # setup RF ports for VSA/VSG
-        # Now a two antenna example
-	
-        scpi.send('ROUT; PORT:RES:ADD ' + vsa_port + ', VSA')
-        scpi.send('ROUT; PORT:RES:ADD ' + vsg_port + ', VSG')
         ref_level = power_level + 9.0 # adding user margin to VSA reference level
         tx_results = measure_tx(freq, ref_level)
         power_offset[power_level] = power_level - float(tx_results['Average_Power'])
@@ -117,21 +151,10 @@ def main():
     for freq in frequencies:
         # TODO: insert DUT control, dut_start_tx(freq, power_level)
 
-        scpi.init(HOST, PORT)
-        scpi.send('VSA; MRST; VSG; MRST; ROUT; MRST; LTE; MRST; CHAN1; CRST; *WAI; SYST:ERR:ALL?')
+        setup_connection()
 
-        vsg_port = 'STRM1A'
-        vsa_port = 'RF4A'
-	
-        # setup RF ports for VSA/VSG
-        # Now a two antenna example
-	
-        scpi.send('ROUT; PORT:RES:ADD ' + vsa_port + ', VSA')
-        scpi.send('ROUT; PORT:RES:ADD ' + vsg_port + ', VSG')
-	
         tx_results = measure_tx(freq, ref_level)
         power_vs_freq_offset[freq] = power_level - float(tx_results['Average_Power'])
-    '''
     # TODO: calculate results from power_vs_freq_offset and store calibration data to the DUT
     # TODO: insert DUT control, dut_stop_tx()
 
@@ -140,8 +163,6 @@ def main():
     # TODO: confirm which LTE calibration waveform to use
     
     # 4th - rx calibration over level (or frequency)
-    #play_waveform('RF1A', lte_calibration_waveform)
-    #play_waveform(lte_calibration_waveform)
     sweep_power_levels = range(-60, -110, -10)
     #freq = 1747.5
     freq = 1747.5e6
@@ -149,18 +170,8 @@ def main():
 
     for power_level in sweep_power_levels:
 
-        scpi.init(HOST, PORT)
-        scpi.send('VSA; MRST; VSG; MRST; ROUT; MRST; LTE; MRST; CHAN1; CRST; *WAI; SYST:ERR:ALL?')
+        setup_connection()
 
-        vsg_port = 'STRM1A'
-        vsa_port = 'RF4A'
-	
-        # setup RF ports for VSA/VSG
-        # Now a two antenna example
-	
-        scpi.send('ROUT; PORT:RES:ADD ' + vsa_port + ', VSA')
-        scpi.send('ROUT; PORT:RES:ADD ' + vsg_port + ', VSG')
-		
         setup_vsg(freq, power_level)
         # TODO: insert DUT control, dut_start_rx(freq)
         # TODO: fetch DUT RSSI, dut_report_rssi()
@@ -172,5 +183,10 @@ def main():
 
     # TODO: reboot the DUT
 
+
+
+"""
+    Automatic execution of main method on run of the script
+"""
 if __name__ == '__main__':
     main()
