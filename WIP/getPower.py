@@ -3,12 +3,13 @@
 # Purpose:     Example IQxstream Python Application
 #
 # Created:     7/11/2017
+# Last Updated: 7/13/2017
 #
-#
-# my_calibration.py is based on the sample_tx_rx_calibration.py sample code,
-# and uses the socket_interface.py code to perform a series of 4 tests. The 
-# program currently uses two RF ports to produce and analyze a signal. The
-# "TODO" functionality is for programming for the DUT.
+# getPower is based on the sample_tx_rx_calibration.py sample code,
+# and uses the socket_interface.py code to load in a waveform and get the signal
+# information.
+# The program currently uses RF4A to as the VSA, and uses a waveform file as the
+# VSG.
 # -----------------------------------------------------------------------------
 import socket_interface as scpi
 
@@ -106,7 +107,8 @@ def setup_connection ():
     scpi.init(HOST, PORT)
     scpi.send('VSA; MRST; VSG; MRST; ROUT; MRST; LTE; MRST; CHAN1; CRST; *WAI; SYST:ERR:ALL?')
 
-    vsg_port = 'STRM1A'
+    #vsg_port = 'STRM1A'
+    vsg_port = 'RF4A'
     vsa_port = 'RF4A'
 	
     # setup RF ports for VSA/VSG
@@ -137,66 +139,7 @@ def main():
 	
 	# TODO: insert DUT control, dut_start_tx(freq, 20.0)
     tx_results = measure_tx(freq, 29)
-    """
-	freq_err = tx_results['Average_Frequency_Offset']
-	
-    # TODO: calculate and correct frequency error
-    # 2nd - sweep power levels
-    sweep_power_levels = range(23, -55, -1)
-    power_offset = {}
 
-    for power_level in sweep_power_levels:
-        # TODO: insert DUT control, dut_start_tx(freq, power_level)
-        
-        setup_connection()
-
-        ref_level = power_level + 9.0 # adding user margin to VSA reference level
-        tx_results = measure_tx(freq, ref_level)
-        power_offset[power_level] = power_level - float(tx_results['Average_Power'])
-
-    # TODO: calculate results from power_offset and store calibration data to the DUT
-    
-	
-    # 3rd - sweep power vs. frequency
-    power_level = 20.0
-    frequencies = [1710e6, 1747.5e6, 1785e6]
-    ref_level = power_level + 9.0  # adding user margin to VSA reference level
-    power_vs_freq_offset = {}
-    for freq in frequencies:
-        # TODO: insert DUT control, dut_start_tx(freq, power_level)
-
-        setup_connection()
-
-        tx_results = measure_tx(freq, ref_level)
-        power_vs_freq_offset[freq] = power_level - float(tx_results['Average_Power'])
-    # TODO: calculate results from power_vs_freq_offset and store calibration data to the DUT
-    # TODO: insert DUT control, dut_stop_tx()
-
-    #lte_calibration_waveform = 'dummy_lte_calibration_waveform.iqvsg'
-    lte_calibration_waveform = 'HHtest.iqvsg'
-    # TODO: confirm which LTE calibration waveform to use
-    
-    # 4th - rx calibration over level (or frequency)
-    sweep_power_levels = range(-60, -110, -10)
-    #freq = 1747.5
-    freq = 1747.5e6
-    rssi_offset = {}
-
-    for power_level in sweep_power_levels:
-
-        setup_connection()
-
-        setup_vsg(freq, power_level)
-        # TODO: insert DUT control, dut_start_rx(freq)
-        # TODO: fetch DUT RSSI, dut_report_rssi()
-        play_waveform(lte_calibration_waveform)       
-        rssi = -9.91e37 # rssi = dut_report_rssi()
-        rssi_offset[power_level] = power_level - rssi
-
-    # TODO: calculate results from rssi_offset and store calibration to the DUT
-
-    # TODO: reboot the DUT
-    """
 
 
 """

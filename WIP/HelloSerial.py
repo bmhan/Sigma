@@ -23,14 +23,16 @@ hello = sio.readline()
 print (hello.encode('utf-8'))
 print(hello == unicode("hello\n"))
 """
-
+"""
 # Writes hello world to the chip, and checks the return value to be the same
 ser.write ("hello\n")
 ser.flush()
 hello = ser.readline()
 print (hello)
 print(hello == "hello\n")
+"""
 
+"""
 #Writes the d 9 command to the chip, and returns the output
 ser.write ("d 9\n")
 output = ser.read(1024)
@@ -39,6 +41,8 @@ print ("Command is done")
 
 #For loop that accepts user input and sends it to the chip, and
 # returns the output
+"""
+
 while 1:
 	input1 = raw_input ("Enter what you want to say: ")
 	if input1 == "q":
