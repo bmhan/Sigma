@@ -27,14 +27,16 @@ return:
     Dictionary of information 
 """
 def measure_tx(freq, reference_level):
+    print ("Performing Single Analysis...\n")
     # setup VSA, this can be done just once per signal type
     # assuming immediate trigger at the moment
-    scpi.send('VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms')  
-
+    scpi.send('VSA; TRIG:SOUR IMM; CAPT:TIME 10ms') 
+    	
+    """
     # setup freq and ref. level
     scpi.send('VSA; FREQ ' + str(freq))
     scpi.send('RLEV ' + str(reference_level))
-	
+	"""
     # initiate a capture
     scpi.send('VSA; INIT')
     ret = scpi.send('*WAI; SYST:ERR:ALL?')
@@ -42,10 +44,15 @@ def measure_tx(freq, reference_level):
 
     # analyze the LTE signal - 1 subframe for example
     result_dict = {}
-    scpi.send('LTE; CLE:ALL; CALC:POW 0,2; CALC:TXQ 0,1')
+    scpi.send('LTE; CLE:ALL; CALC:POW 0,2')
+    ret2 = scpi.send('*WAI; SYST:ERR:ALL?')
+    print ("Capture status again" + ret2)
     power_arr = scpi.send('FETC:POW:AVER?').replace(';', '').split(',')
     result_dict['Average_Power'] = power_arr[1]
-
+    
+    scpi.send('CALC:TXQ 0,1')
+    ret3 = scpi.send('*WAI; SYST:ERR:ALL?')
+    print ("Capture status again" + ret3)
     txq_array = scpi.send('FETC:TXQ:AVER?').replace(';', '').split(',')
     result_dict['Status_Code'] = txq_array[0]
     result_dict['Average_IQ_Offset'] = txq_array[1]
@@ -58,7 +65,7 @@ def measure_tx(freq, reference_level):
     result_dict['Average_Phase_Imbalance'] = txq_array[8]
 	
     return result_dict
-
+    
 
 
 """
@@ -68,7 +75,7 @@ param:
 """
 def play_waveform(waveform_file):
     # enable port RF1A with VSG
-   
+    print ("Loading the waveform " + waveform_file + "...\n")
     scpi.send('VSG; WAVE:LOAD "/USER/' + waveform_file + '"')
     scpi.send('VSG; WAVE:EXEC ON')
     ret = scpi.send('*WAI; SYST:ERR:ALL?')
@@ -83,6 +90,8 @@ param:
     power - power to set the VSG
 """
 def setup_vsg(frequency, power):
+    print ("Setting up the VSG with frequency " + str(frequency) +
+    " and power " + str(power) + "...\n")
     scpi.send('VSG; FREQ ' + str(frequency))
     scpi.send('POW:LEV ' + str(power))
     ret = scpi.send('*WAI; SYST:ERR:ALL?')
@@ -118,14 +127,19 @@ Main method performs 4 tests
 def main():
     # this is a simple conceptual calibration procedure
     setup_connection()
-
-    # 1st - measure frequency error
+    setup_vsg(2500e6, -10)
+    waveform = 'LTE_FDD_UL_10MHZ_50RB_QPSK_LP.iqvsg'
+    
+	# 1st - measure frequency error
     freq = 1747.5e6
-
-    # TODO: insert DUT control, dut_start_tx(freq, 20.0)
+    play_waveform(waveform)
+    
+	
+	# TODO: insert DUT control, dut_start_tx(freq, 20.0)
     tx_results = measure_tx(freq, 29)
-    freq_err = tx_results['Average_Frequency_Offset']
-
+    """
+	freq_err = tx_results['Average_Frequency_Offset']
+	
     # TODO: calculate and correct frequency error
     # 2nd - sweep power levels
     sweep_power_levels = range(23, -55, -1)
@@ -182,7 +196,7 @@ def main():
     # TODO: calculate results from rssi_offset and store calibration to the DUT
 
     # TODO: reboot the DUT
-
+    """
 
 
 """
