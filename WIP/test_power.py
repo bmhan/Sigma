@@ -42,17 +42,23 @@ def measure_tx(freq, reference_level):
 	#CHAN1;LTE;CONF:RNTI 1
 	#VSA1;FREQ:cent 782000000
 	#VSA1 ; RLEVel:AUTO
+	#CHAN1;LTE;CONF:EARF:DL 5180
 	
     scpi.send ('CHAN1;LTE;CONF:RBC AUTO')
     scpi.send('CHAN1;LTE;CONF:BAND 13')
     scpi.send('CHAN1;LTE;CONF:EARF:UL:cc1 23180')
     scpi.send('CHAN1;LTE;CONF:CID:cc 10')
     scpi.send('CHAN1;LTE;CONF:RNTI 1')
-    
-	# setup freq and ref. level
-    scpi.send('VSA; FREQ ' + str(freq))
-    scpi.send('RLEV ' + str(reference_level))
+    scpi.send('VSA1;FREQ:cent 782000000')
+    scpi.send('VSA1 ; RLEVel:AUTO')
+    scpi.send('CHAN1;LTE;CONF:EARF:DL 5180')
+    ret4 = scpi.send('*WAI; SYST:ERR:ALL?')
+    print ("VSA Settings Status: " + ret4)
 	
+	# setup freq and ref. level
+    #scpi.send('VSA; FREQ ' + str(freq))
+    #scpi.send('RLEV ' + str(reference_level))
+
     # initiate a capture
     scpi.send('VSA; INIT')
     ret = scpi.send('*WAI; SYST:ERR:ALL?')
@@ -67,10 +73,10 @@ def measure_tx(freq, reference_level):
     result_dict['Average_Power'] = power_arr[1]  
 	
     
-
+    
     scpi.send('CALC:TXQ 0,1')
     ret3 = scpi.send('*WAI; SYST:ERR:ALL?')
-    print ("Capture status again" + ret3)
+    print ("TXQuality status: " + ret3)
     txq_array = scpi.send('FETC:TXQ:AVER?').replace(';', '').split(',')
     result_dict['Status_Code'] = txq_array[0]
     result_dict['Average_IQ_Offset'] = txq_array[1]
@@ -81,7 +87,7 @@ def measure_tx(freq, reference_level):
     result_dict['Average_Peak_RS_EVM'] = txq_array[6]
     result_dict['Average_Amplitude_Imbalance'] = txq_array[7]
     result_dict['Average_Phase_Imbalance'] = txq_array[8]
-	
+    
 	
     return result_dict
     
@@ -165,6 +171,9 @@ def setup_DUT():
     print ("Initializing DUT...\n")
     ser.write("d 9\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+	
+    print ("Writing 2c0")
+    ser.write("wr 2c0 c28\n")
 	
     print ("Tx...\n")
     ser.write("d 20\n")
