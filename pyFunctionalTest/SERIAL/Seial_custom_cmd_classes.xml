@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<zw_classes>
+
+  <cmd_class key="0x0000" version="1" name="COMMAND_CLASS_PERIPHERAL" help="Command Class Auto Run Peripheral" read_only="False" comment="">
+    <cmd key="0x0000" name="TestAll" help="Test All" command="0x0000">
+    </cmd>
+  </cmd_class>
+  
+  <cmd_class key="0x0001" version="1" name="COMMAND_CLASS_GPIO" help="Command Class GPIO" read_only="False" comment="">
+    <cmd key="0x01" name="GPIO_SET" help="gpio (set|s|clr|c|read|r) num_of_gpio_pin" command="gpio s">
+      <param key="0x00" name="Gpio Pin" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="False" />
+      </param>
+    </cmd>
+    <cmd key="0x02" name="GPIO_CLEAR" help="gpio (set|s|clr|c|read|r) num_of_gpio_pin" command="gpio c">
+      <param key="0x00" name="Gpio Pin" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x00" hasdefines="False" showhex="False" />
+      </param>
+    </cmd>
+    <cmd key="0x03" name="GPIO_READ" help="gpio (set|s|clr|c|read|r) num_of_gpio_pin" command="gpio r">
+      <param key="0x00" name="Gpio Pin" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x00" hasdefines="False" showhex="False" />
+      </param>
+    </cmd>
+  </cmd_class>
+
+  <cmd_class key="0x0002" version="1" name="COMMAND_CLASS_MEM" help="Command Class MEM" read_only="False" comment="">
+    <cmd key="0x00" name="MEM READ" help="memread {address} {num of words to read}" command="memread">
+      <param key="0x00" name="Mem address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x01" name="Words to read" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+	
+	<cmd key="0x01" name="MEM WRITE" help="memwrite {address} {value in hex}" command="memwrite">
+      <param key="0x00" name="Mem address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x01" name="Value(hex)" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+  </cmd_class>
+  
+  <cmd_class key="0x0003" version="1" name="COMMAND_CLASS_RFFE" help="Command Class RFFE" read_only="False" comment="">
+    <cmd key="0x00" name="RFFE RDREG" help="rffe_rdreg {slave id} {address}" command="rffe_rdreg">
+      <param key="0x00" name="Slave id" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x01" name="Address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+    <cmd key="0x01" name="RFFE WRREG" help="rffe_wrreg {slave id} {address} {data}" command="rffe_wrreg">
+      <param key="0x00" name="Slave id" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x01" name="Address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x01" name="Data" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+
+  </cmd_class>
+  
+  <cmd_class key="0x0004" version="1" name="COMMAND_CLASS_RFIC" help="Command Class RFIC" read_only="False" comment="">
+    <cmd key="0x00" name="RFIC RDREG" help="rfic_rdreg_usage {address}" command="rfic_rdreg">
+      <param key="0x00" name="Address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+    <cmd key="0x01" name="RFIC WRREG" help="rfic_rdreg_usage {address} {data}" command="rfic_wrreg">
+      <param key="0x00" name="Address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x01" name="Data" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+  </cmd_class>
+  
+  <cmd_class key="0x0005" version="1" name="COMMAND_CLASS_D" help="Command Class D" read_only="False" comment="">
+    <cmd key="0x00" name="RD" help="rd {address}" command="rd">
+      <param key="0x00" name="Address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+    <cmd key="0x01" name="WR" help="wr {address} {data}" command="wr">
+      <param key="0x00" name="Address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x01" name="Data" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+    <cmd key="0x02" name="WR 4" help="wr {address} {end_pos} {begin_pos} {data}" command="wr">
+      <param key="0x01" name="Address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x02" name="End_pos" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x03" name="Begin_pos" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x04" name="Data" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+    <cmd key="0x03" name="D" help="d  {options}" command="d">
+      <param key="0x00" name="Options" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>    
+  </cmd_class>
+  
+  <cmd_class key="0x0006" version="1" name="COMMAND_CLASS_XXX" help="Command Class D" read_only="False" comment="">
+    <cmd key="0x00" name="RD" help="RD" command="rd">
+      <param key="0x00" name="Address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+    <cmd key="0x01" name="WR" help="WR" command="wr">
+      <param key="0x00" name="Address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x01" name="Data" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+    <cmd key="0x02" name="WR 4" help="WR" command="wr">
+      <param key="0x01" name="Address" type="DWORD" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x02" name="End_pos" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x03" name="Begin_pos" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+      <param key="0x04" name="Data" type="INT" typehashcode="0x01" comment="">
+        <valueattrib key="0x01" hasdefines="False" showhex="True" />
+      </param>
+    </cmd>
+  </cmd_class>
+
+</zw_classes>
