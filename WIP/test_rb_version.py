@@ -12,12 +12,15 @@
 import socket_interface as scpi
 import serial
 import time
+import csv
+import os
 
 HOST = '10.10.14.202'
 PORT = 24000
 VSA_FREQ = 782e6
 VSA_REF_LEVEL = 2
 BLOCK_READ_SIZE = 1024
+CSV = 'test_rb_result.csv'
 #RB_ARRAY = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,
 #50,54,60,64,72,75,80,81,90,96,100]
 RB_ARRAY =[1,2,6]
@@ -31,7 +34,8 @@ params:
 return: 
     Dictionary of information 
 """
-def measure_tx(freq, reference_level):
+#def measure_tx(freq, reference_level):
+def measure_tx(rb): 
     print ("Performing Single Analysis...\n")
     # setup VSA, this can be done just once per signal type
     # assuming immediate trigger at the moment
@@ -73,7 +77,7 @@ def measure_tx(freq, reference_level):
     ret2 = scpi.send('*WAI; SYST:ERR:ALL?')
     print ("Average Power Calculation status: " + ret2)
     power_arr = scpi.send('FETC:POW:AVER?').replace(';', '').split(',')
-    result_dict['Average_Power'] = power_arr[1]  
+    result_dict['Average Power'] = power_arr[1]  
 	
     
     
@@ -82,9 +86,10 @@ def measure_tx(freq, reference_level):
     print ("TXQuality status: " + ret3)
     txq_array = scpi.send('FETC:TXQ:AVER?').replace(';', '').split(',')
     
+    print ("\nRB Value: \t\t\t" + str(rb))
     print ("\nStatus Code: \t\t\t" + str(txq_array[0]))
     print ("Average_IQ_Offset: \t\t" + str(txq_array[1]))
-    print ("Average_Frequency_Offset: \t" + str(txq_array[2]))
+    print ("Average_Frequency_Error: \t" + str(txq_array[2]))
     print ("Average_Data_EVM: \t\t" + str(txq_array[3]))
     print ("Average_Peak_Data_EVM: \t\t" + str(txq_array[4]))
     print ("Average_RS_EVM: \t\t" + str(txq_array[5]))
@@ -93,17 +98,17 @@ def measure_tx(freq, reference_level):
     print ("Average_Phase_Imbalance: \t" + str(txq_array[8]))
 
 	#The dictionary TODO to be put into the .csv file
-    result_dict['Status_Code'] = txq_array[0]
-    result_dict['Average_IQ_Offset'] = txq_array[1]
-    result_dict['Average_Frequency_Offset'] = txq_array[2]
-    result_dict['Average_Data_EVM'] = txq_array[3]
-    result_dict['Average_Peak_Data_EVM'] = txq_array[4]
-    result_dict['Average_RS_EVM'] = txq_array[5]
-    result_dict['Average_Peak_RS_EVM'] = txq_array[6]
-    result_dict['Average_Amplitude_Imbalance'] = txq_array[7]
-    result_dict['Average_Phase_Imbalance'] = txq_array[8]
+    #result_dict['Status_Code'] = txq_array[0]
+    result_dict['nRB Value'] = str(rb)
+    result_dict['Average IQ Offset'] = txq_array[1]
+    result_dict['Average Frequency Error'] = txq_array[2]
+    result_dict['Average Data EVM'] = txq_array[3]
+    result_dict['Average Peak_Data EVM'] = txq_array[4]
+    result_dict['Average RS EVM'] = txq_array[5]
+    result_dict['Average Peak RS EVM'] = txq_array[6]
+    result_dict['Average IQ Imbalance Gain'] = txq_array[7]
+    result_dict['Average IQ Imbalance Phase'] = txq_array[8]
     
-	
     return result_dict
     
 
@@ -216,7 +221,18 @@ Main method performs the following:
 	Measure the average power of the transmitted signal
 """
 def main():
-    #Setting up DUT before sending PUSCH signal
+    #Writing the header of the .csv file
+    '''
+    with open ('test_rb_result.csv', 'wb') as result:
+        wr = csv.DictWriter (result, fieldnames = [
+        "nRB", "Average Power", "Average IQ Offset",
+        "Average Frequency Error","Average Data EVM","Average Peak Data EVM",
+        "Average RS EVM","Average Peak RS EVM", "Average IQ Imbalance Gain",
+        "Average IQ Imbalance Phase"])
+        wr.writeheader()
+    '''
+	
+	#Setting up DUT before sending PUSCH signal
     ser = setup_DUT()
 	
     for rb in RB_ARRAY:   
@@ -225,7 +241,7 @@ def main():
     
 	    #Establish connection to DUT
         #ser = serial.Serial('COM4', 115200, timeout = 5)
-
+		
 	    #set RB form: d 34 (your num here) 0\n
         print ("\nSending PUSCH...\n")
         ser.write("d 34 " + str(rb) + " 0\n")
@@ -235,8 +251,26 @@ def main():
         setup_connection()
 	
 	    #Measure the avg_power and txquality
-        tx_results = measure_tx(VSA_FREQ, VSA_REF_LEVEL)
-        
+        tx_results = measure_tx(rb)
+
+        #Writes header if there is none
+        if not os.path.isfile(CSV):
+            with open (CSV,'a') as result:
+                wr = csv.DictWriter(result, tx_results.keys())
+                wr.writeheader()
+		
+        #Writing the rest of the data to the file
+        with open (CSV,'a') as result:
+            wr = csv.DictWriter(result, tx_results.keys())
+			
+			#Write nRB to file
+            #file = open (CSV, 'a')
+            #file.write(str(rb) + ",")
+            #file.close()
+			
+            #Writes the rest of the information
+            wr.writerow(tx_results)
+
 	#TODO procedure finished; reset DUT
 
 
