@@ -18,7 +18,9 @@ PORT = 24000
 VSA_FREQ = 782e6
 VSA_REF_LEVEL = 2
 BLOCK_READ_SIZE = 1024
-
+#RB_ARRAY = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,
+#50,54,60,64,72,75,80,81,90,96,100]
+RB_ARRAY =[6]
 
 
 """
@@ -144,7 +146,7 @@ def setup_connection ():
 """
 Function sets up the DUT to transmit the signal
 """
-def setup_DUT():
+def setup_DUT(rb_num):
 
     #Establish connection to DUT
     ser = serial.Serial('COM4', 115200, timeout = 5)
@@ -185,10 +187,11 @@ def setup_DUT():
     ser.write("d 27 -31 -36 904 914 0 -6\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
-	#set RB form d 34 (your num here) 0\n
+    #set RB form: d 34 (your num here) 0\n
     print ("Send PUSCH\n")
-    ser.write("d 34 12 0\n")
-
+    ser.write("d 34 " + str(rb_num) + " 0\n")
+    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+	
 	
 	
 """
@@ -198,15 +201,16 @@ Main method performs the following:
 	Measure the average power of the transmitted signal
 """
 def main():
-   
-    #this procedure sets up the DUT to transmit a signal
-    setup_DUT()
+    for rb in RB_ARRAY:   
+        #this procedure sets up the DUT to transmit a signal
+        setup_DUT(rb)
     
-	# this is a simple conceptual calibration procedure
-    setup_connection()
+	    # this is a simple conceptual calibration procedure
+        setup_connection()
 	
-	#Measure the avg_power and txquality
-    tx_results = measure_tx(VSA_FREQ, VSA_REF_LEVEL)
+	    #Measure the avg_power and txquality
+        tx_results = measure_tx(VSA_FREQ, VSA_REF_LEVEL)
+        
 	#TODO procedure finished; reset DUT
 
 
