@@ -20,7 +20,7 @@ VSA_REF_LEVEL = 2
 BLOCK_READ_SIZE = 1024
 #RB_ARRAY = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,
 #50,54,60,64,72,75,80,81,90,96,100]
-RB_ARRAY =[6]
+RB_ARRAY =[1,2,6]
 
 
 """
@@ -81,6 +81,18 @@ def measure_tx(freq, reference_level):
     ret3 = scpi.send('*WAI; SYST:ERR:ALL?')
     print ("TXQuality status: " + ret3)
     txq_array = scpi.send('FETC:TXQ:AVER?').replace(';', '').split(',')
+    
+    print ("\nStatus Code: \t\t\t" + str(txq_array[0]))
+    print ("Average_IQ_Offset: \t\t" + str(txq_array[1]))
+    print ("Average_Frequency_Offset: \t" + str(txq_array[2]))
+    print ("Average_Data_EVM: \t\t" + str(txq_array[3]))
+    print ("Average_Peak_Data_EVM: \t\t" + str(txq_array[4]))
+    print ("Average_RS_EVM: \t\t" + str(txq_array[5]))
+    print ("Average_Peak_RS_EVM: \t\t" + str(txq_array[6]))
+    print ("Average_Amplitude_Imbalance: \t" + str(txq_array[7]))
+    print ("Average_Phase_Imbalance: \t" + str(txq_array[8]))
+
+	#The dictionary TODO to be put into the .csv file
     result_dict['Status_Code'] = txq_array[0]
     result_dict['Average_IQ_Offset'] = txq_array[1]
     result_dict['Average_Frequency_Offset'] = txq_array[2]
@@ -146,7 +158,7 @@ def setup_connection ():
 """
 Function sets up the DUT to transmit the signal
 """
-def setup_DUT(rb_num):
+def setup_DUT():
 
     #Establish connection to DUT
     ser = serial.Serial('COM4', 115200, timeout = 5)
@@ -171,26 +183,29 @@ def setup_DUT(rb_num):
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
     """
 
-    print ("Initializing DUT...\n")
+    print ("\nInitializing DUT...\n")
     ser.write("d 9\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
-    print ("Writing 2c0")
+    print ("Writing 2c0...\n")
     #ser.write("wr 2c0 c28\n")
     ser.write("wr 2c0 12 8 c\n")
-	
+    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+    
     print ("Tx...\n")
     ser.write("d 20\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
-    print ("Gain and Offset\n")
+    print ("Gain and Offset...\n")
     ser.write("d 27 -31 -36 904 914 0 -6\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
     #set RB form: d 34 (your num here) 0\n
-    print ("Send PUSCH\n")
-    ser.write("d 34 " + str(rb_num) + " 0\n")
-    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+    #print ("Sending PUSCH...\n")
+    #ser.write("d 34 " + str(rb_num) + " 0\n")
+    #print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+	
+    return ser
 	
 	
 	
@@ -201,10 +216,21 @@ Main method performs the following:
 	Measure the average power of the transmitted signal
 """
 def main():
+    #Setting up DUT before sending PUSCH signal
+    ser = setup_DUT()
+	
     for rb in RB_ARRAY:   
         #this procedure sets up the DUT to transmit a signal
-        setup_DUT(rb)
+        #setup_DUT(rb)
     
+	    #Establish connection to DUT
+        #ser = serial.Serial('COM4', 115200, timeout = 5)
+
+	    #set RB form: d 34 (your num here) 0\n
+        print ("\nSending PUSCH...\n")
+        ser.write("d 34 " + str(rb) + " 0\n")
+        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+		
 	    # this is a simple conceptual calibration procedure
         setup_connection()
 	
