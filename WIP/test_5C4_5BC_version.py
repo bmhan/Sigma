@@ -1,13 +1,18 @@
 # -----------------------------------------------------------------------------
-# Name:        test_power
-# Purpose:     Get the average power from the board.
-# Created:     7/13/2017
-# Last Updated: 7/13/2017
+# Name:        test_5C4_5BC_version
+# Purpose:     Get the TXQuality data, sweeping registers 5bc and 5c4
+# Created:     7/14/2017
+# Last Updated: 7/14/2017
 #
-# test_power configures the Litepoint IQxstream machine to analyze the 782 MHz
-# produced by the board. The program uses the socket_interface.py to initialize
-# a connection to the board and send and receive data from IQxstream. The serial
-# library is used to communicate to the board for testing.
+# NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
+# test_5C4_5BC_version configures the Litepoint IQxstream machine to analyze the
+# 782 MHz produced by the board.  The program sweeps values for the 5c4 and 5bc
+# registers from the TX_Power_Control Excel Doc. The program uses the
+# socket_interface.py to initialize a connection to the board and send and
+# receive data from IQxstream. The serial library is used to communicate to the
+# board for testing. The result of the test is printed to terminal, and stored 
+# in the two .csv files test_5C4_5BC_result.csv and the sorted version
+# test_5C4_5BC_result_ordered.csv
 # -----------------------------------------------------------------------------
 import socket_interface as scpi
 import serial
@@ -34,14 +39,13 @@ params:
 return: 
     Dictionary of information 
 """
-#def measure_tx(freq, reference_level):
 def measure_tx(rb, val5c4, val5bc): 
     print ("Performing Single Analysis...\n")
     # setup VSA, this can be done just once per signal type
     # assuming immediate trigger at the moment
     scpi.send('VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms')	
     
-	#Settings setup
+	#Settings setup taken from the SCPI Console
 	#CHAN1;LTE;CONF:RBC AUTO
 	#CHAN1;LTE;CONF:BAND13
 	#CHAN1;LTE;CONF:EARF:UL:cc1 23180
@@ -86,6 +90,7 @@ def measure_tx(rb, val5c4, val5bc):
     print ("TXQuality status: " + ret3)
     txq_array = scpi.send('FETC:TXQ:AVER?').replace(';', '').split(',')
     
+	#Printing the TXQuality data to the terminal
     print ("\n5c4 Value: \t\t\t" + str(val5c4))
     print ("5bc Value: \t\t\t" + str(val5bc) + "\n")
     print ("RB Value: \t\t\t" + str(rb))
@@ -99,8 +104,7 @@ def measure_tx(rb, val5c4, val5bc):
     print ("Average_Amplitude_Imbalance: \t" + str(float(txq_array[7])))
     print ("Average_Phase_Imbalance: \t" + str(float(txq_array[8])))
 
-	#The dictionary TODO to be put into the .csv file
-    #result_dict['Status_Code'] = txq_array[0]
+    #Stores the TXQuality data to a dictionary to be written to the .csv files
     result_dict['5c4 Value'] = str(val5c4)
     result_dict['5bc Value'] = str(val5bc)
     result_dict['nRB Value'] = str(rb)
@@ -203,7 +207,7 @@ def setup_DUT():
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
     #set RB form: d 34 (your num here) 0\n
-	#TODO may need to move this into the looping body
+	#TODO may need to move this into the looping body...
     print ("\nSending PUSCH...\n")
     ser.write("d 34 " + str(RB_VAL) + " 0\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
@@ -215,20 +219,12 @@ def setup_DUT():
 """
 Main method performs the following:
 	Set up the DUT board to transmit
+	Sweep thorugh the values and set 5c4 and 5bc registers
 	Set up the Litepoint machine to analyze 782 MHz
-	Measure the average power of the transmitted signal
+	Calculate and Fetch the TXQuality measurements of the signal
+	Return the data through the terminal and the two .csv files
 """
 def main():
-    #Writing the header of the .csv file
-    '''
-    with open ('test_rb_result.csv', 'wb') as result:
-        wr = csv.DictWriter (result, fieldnames = [
-        "nRB", "Average Power", "Average IQ Offset",
-        "Average Frequency Error","Average Data EVM","Average Peak Data EVM",
-        "Average RS EVM","Average Peak RS EVM", "Average IQ Imbalance Gain",
-        "Average IQ Imbalance Phase"])
-        wr.writeheader()
-    '''
 	
 	#Setting up DUT before sending PUSCH signal
     ser = setup_DUT()
@@ -275,7 +271,7 @@ def main():
                 #Writes the rest of the information
                 wr.writerow(tx_results)
             
-    #Trying to reorder the file
+    #Reorders the .csv file by the following column order and store in ordered .csv file
     fieldnames = [
     "5c4 Value", "5bc Value","nRB Value", "Average Power (dBm)", "Average IQ Offset (dB)",
     "Average Frequency Error (Hz)","Average Data EVM (%)",
@@ -288,6 +284,7 @@ def main():
         wr.writeheader()
         for row in csv.DictReader(original):
             wr.writerow(row)
+			
 	#TODO procedure finished; reset DUT
 
 
