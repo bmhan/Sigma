@@ -1,14 +1,13 @@
 # -----------------------------------------------------------------------------
-# Name:        test_rb_version
+# Name:        test_crystal
 # Purpose:     Get the TXQuality data, sweeping the RB
-# Created:     7/13/2017
-# Last Updated: 7/14/2017
+# Created:     7/18/2017
+# Last Updated: 7/18/2017
 #
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
-# test_rb_version configures the Litepoint IQxstream machine to analyze the 782 MHz
-# produced by the board, sweeping the rb values. The result of the test is printed
-# to terminal, and is stored in two .csv files - test_rb_result.csv and the sorted
-# version test_rb_result_ordered.csv.
+# test_crystal configures the Litepoint IQxstream machine to analyze the 782 MHz
+# produced by the board, sweeping the values 0 through 1f for the frequency set
+# in register 2c0.
 # The program uses the socket_interface.py to initialize
 # a connection to the board and send and receive data from IQxstream. The serial
 # library is used to communicate to the board for testing.
@@ -22,12 +21,9 @@ import os
 HOST = '10.10.14.202'
 PORT = 24000
 VSA_FREQ = 782e6
-CABLE_LOSS_DB = 11
 INPUT_CSV = 'input_rb_hex.csv'
 #VSA_REF_LEVEL = 2
 BLOCK_READ_SIZE = 1024
-CSV = 'test_rb_result.csv'
-ORD_CSV = 'test_rb_result_ordered.csv'
 freq_array = [0,1,2,3,4,5,6,7,8,9,10, 'a', 'b', 'c', 'd', 'e', 'f', '1f']
 #RB_ARRAY = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,
 #50,54,60,64,72,75,80,81,90,96,100]
@@ -35,12 +31,9 @@ freq_array = [0,1,2,3,4,5,6,7,8,9,10, 'a', 'b', 'c', 'd', 'e', 'f', '1f']
 
 
 """
-Function returns a dictionary of information on a given signal.
-params:
-    freq - The frequency of the VSA
-    reference_level - The reference level of VSA
+Function returns if the signal frequency is within +/- 1000 Hz
 return: 
-    Dictionary of information 
+    If the signal frequency is within +/- 1000 Hz 
 """
 def measure_tx(): 
     print ("Performing Single Analysis...\n")
@@ -85,16 +78,16 @@ def measure_tx():
 	
     # Calculate and fetch Average Power
 	# Note that the result takes into account cable loss
-    result_dict = {}
     scpi.send('LTE; CLE:ALL; CALC:POW 0,2')
     ret2 = scpi.send('*WAI; SYST:ERR:ALL?')
-    power_arr = scpi.send('FETC:POW:AVER?').replace(';', '').split(',')
 	
     scpi.send('CALC:TXQ 0,1')
     ret3 = scpi.send('*WAI; SYST:ERR:ALL?')
     txq_array = scpi.send('FETC:TXQ:AVER?').replace(';', '').split(',')
 	
-    if int(power_arr[0]) == 0 and int(txq_array[0]) == 0:
+    print ("Average_Frequency_Error: \t" + str(float(txq_array[2])))
+    #if int(power_arr[0]) == 0 and int(txq_array[0]) == 0:
+    if float(txq_array[2]) < 1000 and float (txq_array[2]) > -1000:
         return True	
     else:
         return False
@@ -205,7 +198,7 @@ def main():
 	#Setting up DUT before sending PUSCH signal
     ser = setup_DUT()
 
-    print("Setting up RB and scale...\n")
+    print("Setting up RB and scale, sending PUSCH signal...\n")
     ser.write("d 35 " + str(16) + " 0 " + "179C\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
             
@@ -218,24 +211,10 @@ def main():
         ser.write("wr 2c0 " + str(CSW_XOSC) + "28\n")
         print("DUT response: " + ser.read(BLOCK_READ_SIZE))		
 
-		
-	    #set RB form: d 34 (your num here) 0\n
-        #print ("\nSending PUSCH...\n")
-        #ser.write("d 34 " + str(rb) + " 0\n")
-        #print("DUT response: " + ser.read(BLOCK_READ_SIZE))		
-			
-			#d 35 12 0 98ff
-			
-        """
-        print("Setting up RB and scale...\n")
-        ser.write("d 35 " + str(16) + " 0 " + str(179C) + "\n")
-        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-            
-        print ("Gain and Offset...\n")
-        ser.write("d 27 -14 11 4 14 0 -7\n")
-        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-        """
-			
+        #TODO Optional command to check if the registers was actually written
+        # ser.write("rd 2c0"\n")
+        # print("DUT response: " + ser.read(BLOCK_READ_SIZE))		
+
         # this is a simple conceptual calibration procedure
         scpi = setup_connection()
 	
@@ -246,6 +225,11 @@ def main():
         if freq_found == True:
             print ("Your crystal value is " + str(CSW_XOSC))    
             break
+            
+
+        #TODO May need delay in the case that there is enough time to
+        # do the calculation...
+
     if freq_found == False:
         print ("Your crystal value not found")
                 
@@ -255,9 +239,7 @@ def main():
             #scpi.close()    
             #raw_input("\n\n\tPress a key to Continue\t\n\n")
 
-                
 				
-
 
 
 """
