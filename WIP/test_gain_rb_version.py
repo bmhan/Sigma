@@ -41,7 +41,7 @@ params:
 return: 
     Dictionary of information 
 """
-def measure_tx(rb, hex): 
+def measure_tx(rb, hex, gain): 
     print ("Performing Single Analysis...\n")
     # setup VSA, this can be done just once per signal type
     # assuming immediate trigger at the moment
@@ -99,10 +99,18 @@ def measure_tx(rb, hex):
     scpi.send('CALC:SPEC 0,2')
     ret4 = scpi.send('*WAI; SYST:ERR:ALL?')
     time.sleep(0.1)
+    """
+    print ("ACLR status: " + ret4)
+    eutra_lower = scpi.send('FETC:ACLR:LLIMit?').replace(';', '').split(',')
+    result_dict['E-UTRA Lower(dB)'] = float (eutra_lower[1])
+    eutra_upper = scpi.send('FETC:ACLR:HLIMit?').replace(';', '').split(',')
+    result_dict['E-UTRA Upper(dB)'] = float (eutra_upper[1])
+    """
 	
     #Printing the result of the TXQuality test to the command line
     print ("\nRB Value: \t\t\t" + str(rb))
     print ("\nHex Value: \t\t\t" + str(hex))
+    print ("\nGain Value: \t\t\t" + str(gain))
     print ("\nStatus Code: \t\t\t" + str(float(txq_array[0])))
     print ("\nAverage Power: \t" + str(float(result_dict['Average Power (dBm)'])))
     print ("Average_IQ_Offset: \t\t" + str(float(txq_array[1])))
@@ -113,11 +121,15 @@ def measure_tx(rb, hex):
     print ("Average_Peak_RS_EVM: \t\t" + str(float(txq_array[6])))
     print ("Average_Amplitude_Imbalance: \t" + str(float(txq_array[7])))
     print ("Average_Phase_Imbalance: \t" + str(float(txq_array[8])))
-
+    #print ("E-UTRA Lower: \t" + str(float(aclr_array[1])))
+    #print ("E-UTRA Upper: \t" + str(float(aclr_array[2])))
+    #print ("E-UTRA Lower: \t" + eutra_lower[1])
+    #print ("E-UTRA Upper: \t" + eutra_upper[1])
 	
     #result_dict['Status_Code'] = txq_array[0]
     result_dict['nRB Value'] = str(rb)
     result_dict['Hex Value'] = str(hex)
+    result_dict['Gain Value'] = str(gain)
     result_dict['Average IQ Offset (dB)'] = float(txq_array[1])
     result_dict['Average Frequency Error (Hz)'] = float(txq_array[2])
     result_dict['Average Data EVM (%)'] = float(txq_array[3])
@@ -206,10 +218,10 @@ def setup_DUT():
     ser.write("d 20\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
-    #print ("Gain and Offset...\n")
+    print ("Gain and Offset...\n")
     #ser.write("d 27 -31 -36 904 914 0 -6\n")
-    #ser.write("d 27 -14 11 4 14 0 -7\n")
-    #print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+    ser.write("d 27 -14 11 4 14 0 -7\n")
+    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
     return ser
 	
@@ -227,6 +239,8 @@ Main method performs the following:
 """
 def main():
 
+    gain_start = input ("Gain start: ")
+    gain_stop = input ("Gain stop: ")
 	#Setting up DUT before sending PUSCH signal
     ser = setup_DUT()
 
@@ -236,6 +250,7 @@ def main():
     with open (INPUT_CSV, "rb") as file:
         reader = csv.DictReader(file)
         for row in reader:
+	#for rb in RB_ARRAY:   
 		
 	    #set RB form: d 34 (your num here) 0\n
         #print ("\nSending PUSCH...\n")
@@ -244,37 +259,34 @@ def main():
 		
             RB = row ['rb']
             HEX = row['hex']
-			
 			#d 35 12 0 98ff
-			
-            print("Setting up RB and scale...\n")
             ser.write("d 35 " + str(RB) + " 0 " + str(HEX) + "\n")
-            print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-            
-            print ("Gain and Offset...\n")
-            ser.write("d 27 -14 11 4 14 0 -7\n")
             print("DUT response: " + ser.read(BLOCK_READ_SIZE))
        
 	        #Second loop to sweep through the gain 
 			
-			# this is a simple conceptual calibration procedure
-            setup_connection()
+            for gain in xrange (gain_start, gain_stop + 1):
+                ser.write("d 26 " + str(gain) + "\n")
+			
+			    # this is a simple conceptual calibration procedure
+                setup_connection()
 	
         
-	        #Measure the avg_power and txquality
-            tx_results = measure_tx(RB, HEX)
+	            #Measure the avg_power and txquality
+                tx_results = measure_tx(RB, HEX, gain)
                 
         
-            #Writes header if there is none
-            if not os.path.isfile(CSV):
+                #Writes header if there is none
+                if not os.path.isfile(CSV):
+                   with open (CSV,'ab') as result:
+                       wr = csv.DictWriter(result, tx_results.keys())
+                       wr.writeheader()
+		
+                #Writing the rest of the data to the file
                 with open (CSV,'ab') as result:
                     wr = csv.DictWriter(result, tx_results.keys())
-                    wr.writeheader()
-		
-            #Writing the rest of the data to the file
-            with open (CSV,'ab') as result:
-                wr = csv.DictWriter(result, tx_results.keys())	
-                wr.writerow(tx_results)
+			
+                    wr.writerow(tx_results)
                    
                 
 				
@@ -284,7 +296,7 @@ def main():
     "Average Frequency Error (Hz)","Average Data EVM (%)",
     "Average Peak Data EVM (%)",
     "Average RS EVM (%)","Average Peak RS EVM (%)", "Average IQ Imbalance Gain (dB)",
-    "Average IQ Imbalance Phase (deg)"]
+    "Average IQ Imbalance Phase (deg)", "E-UTRA Lower (dB)", "E-UTRA Upper (dB)"]
 
     with open(CSV,'rb') as original, open (ORD_CSV, 'ab') as ordered:
         wr = csv.DictWriter(ordered, fieldnames = fieldnames)
