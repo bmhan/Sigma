@@ -1,14 +1,17 @@
 # -----------------------------------------------------------------------------
-# Name:        test_rb_version
-# Purpose:     Get the TXQuality data, sweeping the RB
-# Created:     7/13/2017
-# Last Updated: 7/14/2017
+# Name:        test_gain_rb_version
+# Purpose:     Get the TXQuality data, sweeping the gain for each RB
+# Created:     7/17/2017
+# Last Updated: 7/18/2017
 #
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
-# test_rb_version configures the Litepoint IQxstream machine to analyze the 782 MHz
-# produced by the board, sweeping the rb values. The result of the test is printed
-# to terminal, and is stored in two .csv files - test_rb_result.csv and the sorted
-# version test_rb_result_ordered.csv.
+# test_gain_rb_version configures the Litepoint IQxstream machine to analyze the
+# 782 MHz produced by the board, sweeping the rb values and the gain values. 
+# The program begins by prompting the user for a range of gain values to test.
+# The program reads in the input_rb_hex.csv file, reading in the hex value and the
+# rb value.
+# The result of the test is printed to terminal, and is stored in two .csv files -
+# test_gain_rb_result.csv and the sorted version test_gain_rb_result_ordered.csv
 # The program uses the socket_interface.py to initialize
 # a connection to the board and send and receive data from IQxstream. The serial
 # library is used to communicate to the board for testing.
@@ -26,8 +29,8 @@ CABLE_LOSS_DB = 11
 INPUT_CSV = 'input_rb_hex.csv'
 #VSA_REF_LEVEL = 2
 BLOCK_READ_SIZE = 1024
-CSV = 'test_rb_result.csv'
-ORD_CSV = 'test_rb_result_ordered.csv'
+CSV = 'test_gain_rb_result.csv'
+ORD_CSV = 'test_gain_rb_result_ordered.csv'
 #RB_ARRAY = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,
 #50,54,60,64,72,75,80,81,90,96,100]
 #RB_ARRAY = [1,2,6]
@@ -81,7 +84,8 @@ def measure_tx(rb, hex, gain):
     time.sleep(0.1)
     print ("Capture status: " + ret)
 
-    # analyze the LTE signal - 1 subframe for example
+    #Calculating and fetching Average Power
+	#Note that this result takes into account cable loss
     result_dict = {}
     scpi.send('LTE; CLE:ALL; CALC:POW 0,2')
     ret2 = scpi.send('*WAI; SYST:ERR:ALL?')
@@ -90,43 +94,41 @@ def measure_tx(rb, hex, gain):
     result_dict['Average Power (dBm)'] = float(power_arr[1]) + CABLE_LOSS_DB  
 	
     
+	#Calculating and fetching TXQuality
     scpi.send('CALC:TXQ 0,1')
     ret3 = scpi.send('*WAI; SYST:ERR:ALL?')
     print ("TXQuality status: " + ret3)
     txq_array = scpi.send('FETC:TXQ:AVER?').replace(';', '').split(',')
     
-    
+	
+    #Calculating Spectrum and fetching E-UTRA Lower and Upper
     scpi.send('CALC:SPEC 0,2')
     ret4 = scpi.send('*WAI; SYST:ERR:ALL?')
-    time.sleep(0.1)
-    """
     print ("ACLR status: " + ret4)
-    eutra_lower = scpi.send('FETC:ACLR:LLIMit?').replace(';', '').split(',')
-    result_dict['E-UTRA Lower(dB)'] = float (eutra_lower[1])
-    eutra_upper = scpi.send('FETC:ACLR:HLIMit?').replace(';', '').split(',')
-    result_dict['E-UTRA Upper(dB)'] = float (eutra_upper[1])
-    """
-	
+    time.sleep(0.1)
+    scpi.send('FORM:READ:DATA ASC')
+    aclr_array = scpi.send('FETC:ACLR?').replace(';', '').split(',')
+    
+   
     #Printing the result of the TXQuality test to the command line
-    print ("\nRB Value: \t\t\t" + str(rb))
-    print ("\nHex Value: \t\t\t" + str(hex))
-    print ("\nGain Value: \t\t\t" + str(gain))
-    print ("\nStatus Code: \t\t\t" + str(float(txq_array[0])))
-    print ("\nAverage Power: \t" + str(float(result_dict['Average Power (dBm)'])))
-    print ("Average_IQ_Offset: \t\t" + str(float(txq_array[1])))
-    print ("Average_Frequency_Error: \t" + str(float(txq_array[2])))
-    print ("Average_Data_EVM: \t\t" + str(float(txq_array[3])))
-    print ("Average_Peak_Data_EVM: \t\t" + str(float(txq_array[4])))
-    print ("Average_RS_EVM: \t\t" + str(float(txq_array[5])))
-    print ("Average_Peak_RS_EVM: \t\t" + str(float(txq_array[6])))
-    print ("Average_Amplitude_Imbalance: \t" + str(float(txq_array[7])))
-    print ("Average_Phase_Imbalance: \t" + str(float(txq_array[8])))
-    #print ("E-UTRA Lower: \t" + str(float(aclr_array[1])))
-    #print ("E-UTRA Upper: \t" + str(float(aclr_array[2])))
-    #print ("E-UTRA Lower: \t" + eutra_lower[1])
-    #print ("E-UTRA Upper: \t" + eutra_upper[1])
+    print ("\nRB Value: \t\t\t\t" + str(rb))
+    print ("\nHex Value: \t\t\t\t" + str(hex))
+    print ("\nGain Value: \t\t\t\t" + str(gain))
+    print ("\nStatus Code: \t\t\t\t" + str(float(txq_array[0])))
+    print ("\nAverage Power (dBm): \t\t\t" + str(float(result_dict['Average Power (dBm)'])))
+    print ("Average_IQ_Offset (dB): \t\t" + str(float(txq_array[1])))
+    print ("Average_Frequency_Error (Hz): \t\t" + str(float(txq_array[2])))
+    print ("Average_Data_EVM (%): \t\t\t" + str(float(txq_array[3])))
+    print ("Average_Peak_Data_EVM (%): \t\t" + str(float(txq_array[4])))
+    print ("Average_RS_EVM (%): \t\t\t" + str(float(txq_array[5])))
+    print ("Average_Peak_RS_EVM (%): \t\t" + str(float(txq_array[6])))
+    print ("Average_Amplitude_Imbalance (dB): \t" + str(float(txq_array[7])))
+    print ("Average_Phase_Imbalance (deg): \t\t" + str(float(txq_array[8])))
+    print ("ACLR E-UTRA Lower (dB): \t\t" + str(float(aclr_array[2])))
+    print ("ACLR E-UTRA Upper (dB): \t\t" + str(float(aclr_array[3])))
+
 	
-    #result_dict['Status_Code'] = txq_array[0]
+	#Storing the results to be written to the .csv file
     result_dict['nRB Value'] = str(rb)
     result_dict['Hex Value'] = str(hex)
     result_dict['Gain Value'] = str(gain)
@@ -138,7 +140,8 @@ def measure_tx(rb, hex, gain):
     result_dict['Average Peak RS EVM (%)'] = float(txq_array[6])
     result_dict['Average IQ Imbalance Gain (dB)'] = float(txq_array[7])
     result_dict['Average IQ Imbalance Phase (deg)'] = float(txq_array[8])
-
+    result_dict['ACLR E-UTRA Lower (dB)'] = float (aclr_array[2])
+    result_dict['ACLR E-UTRA Upper (dB)'] = float (aclr_array[3])
     
     return result_dict
     
@@ -189,6 +192,8 @@ def setup_connection ():
     # setup RF port for VSA/VSG
     scpi.send('ROUT; PORT:RES:ADD ' + vsa_port + ', VSA')
     scpi.send('ROUT; PORT:RES:ADD ' + vsg_port + ', VSG')
+	
+    return scpi
 
 
 
@@ -239,8 +244,11 @@ Main method performs the following:
 """
 def main():
 
+    #User input to get the gain range
     gain_start = input ("Gain start: ")
     gain_stop = input ("Gain stop: ")
+	
+    
 	#Setting up DUT before sending PUSCH signal
     ser = setup_DUT()
 
@@ -259,30 +267,36 @@ def main():
 		
             RB = row ['rb']
             HEX = row['hex']
-			#d 35 12 0 98ff
+
+            #Sending PUSCH signal with inputed RB, gain, scale
+			#Form: d 35 12 0 98ff
+            print("PUSCH command...\n")
             ser.write("d 35 " + str(RB) + " 0 " + str(HEX) + "\n")
             print("DUT response: " + ser.read(BLOCK_READ_SIZE))
        
 	        #Second loop to sweep through the gain 
-			
             for gain in xrange (gain_start, gain_stop + 1):
                 ser.write("d 26 " + str(gain) + "\n")
 			
 			    # this is a simple conceptual calibration procedure
-                setup_connection()
+                scpi = setup_connection()
 	
-        
 	            #Measure the avg_power and txquality
                 tx_results = measure_tx(RB, HEX, gain)
                 
-        
+                #Temporary stop procedure (uncomment to use!)
+                #Close socket connection to enable GUI access
+                #Ask for raw_input to temporarily pause execution
+                scpi.close()    
+                raw_input("\n\n\tPress a key to Continue\t\n\n")
+		
                 #Writes header if there is none
                 if not os.path.isfile(CSV):
                    with open (CSV,'ab') as result:
                        wr = csv.DictWriter(result, tx_results.keys())
                        wr.writeheader()
 		
-                #Writing the rest of the data to the file
+                #Writing the rest of the non-header data to the file
                 with open (CSV,'ab') as result:
                     wr = csv.DictWriter(result, tx_results.keys())
 			
@@ -296,14 +310,14 @@ def main():
     "Average Frequency Error (Hz)","Average Data EVM (%)",
     "Average Peak Data EVM (%)",
     "Average RS EVM (%)","Average Peak RS EVM (%)", "Average IQ Imbalance Gain (dB)",
-    "Average IQ Imbalance Phase (deg)", "E-UTRA Lower (dB)", "E-UTRA Upper (dB)"]
+    "Average IQ Imbalance Phase (deg)", "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)"]
 
     with open(CSV,'rb') as original, open (ORD_CSV, 'ab') as ordered:
         wr = csv.DictWriter(ordered, fieldnames = fieldnames)
         wr.writeheader()
         for row in csv.DictReader(original):
             wr.writerow(row)
-	#TODO procedure finished; reset DUT
+
 
 
 
