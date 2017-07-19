@@ -44,7 +44,7 @@ params:
 return: 
     Dictionary of information 
 """
-def measure_tx(rb, hex, gain): 
+def measure_tx(rb, hex, gain, rb_offset): 
     print ("Performing Single Analysis...\n")
     # setup VSA, this can be done just once per signal type
     # assuming immediate trigger at the moment
@@ -87,7 +87,8 @@ def measure_tx(rb, hex, gain):
     #Calculating and fetching Average Power
 	#Note that this result takes into account cable loss
     result_dict = {}
-    scpi.send('LTE; CLE:ALL; CALC:POW 0,2')
+    scpi.send('LTE; CLE:ALL; CALC:POW 0,20')
+    time.sleep(0.1)
     ret2 = scpi.send('*WAI; SYST:ERR:ALL?')
     print ("Average Power Calculation status: " + ret2)
     power_arr = scpi.send('FETC:POW:AVER?').replace(';', '').split(',')
@@ -95,14 +96,15 @@ def measure_tx(rb, hex, gain):
 	
     
 	#Calculating and fetching TXQuality
-    scpi.send('CALC:TXQ 0,1')
+    scpi.send('CALC:TXQ 0,10')
+    time.sleep(0.1)
     ret3 = scpi.send('*WAI; SYST:ERR:ALL?')
     print ("TXQuality status: " + ret3)
     txq_array = scpi.send('FETC:TXQ:AVER?').replace(';', '').split(',')
     
 	
     #Calculating Spectrum and fetching E-UTRA Lower and Upper
-    scpi.send('CALC:SPEC 0,2')
+    scpi.send('CALC:SPEC 0,20')
     ret4 = scpi.send('*WAI; SYST:ERR:ALL?')
     print ("ACLR status: " + ret4)
     time.sleep(0.1)
@@ -112,6 +114,7 @@ def measure_tx(rb, hex, gain):
    
     #Printing the result of the TXQuality test to the command line
     print ("\nRB Value: \t\t\t\t" + str(rb))
+    print ("\nRB Offset: \t\t\t\t" + str(rb_offset))
     print ("\nHex Value: \t\t\t\t" + str(hex))
     print ("\nGain Value: \t\t\t\t" + str(gain))
     print ("\nStatus Code: \t\t\t\t" + str(float(txq_array[0])))
@@ -132,6 +135,7 @@ def measure_tx(rb, hex, gain):
     result_dict['nRB Value'] = str(rb)
     result_dict['Hex Value'] = str(hex)
     result_dict['Gain Value'] = str(gain)
+    result_dict['RB Offset'] = str(rb_offset)
     result_dict['Average IQ Offset (dB)'] = float(txq_array[1])
     result_dict['Average Frequency Error (Hz)'] = float(txq_array[2])
     result_dict['Average Data EVM (%)'] = float(txq_array[3])
@@ -203,7 +207,7 @@ Function sets up the DUT to transmit the signal
 def setup_DUT():
 
     #Establish connection to DUT
-    ser = serial.Serial('COM5', 115200, timeout = 5)
+    ser = serial.Serial('COM7', 115200, timeout = 5)
 
 	
 	
@@ -215,7 +219,7 @@ def setup_DUT():
     #ser.write("wr 2c0 c28\n")
     #ser.write("wr 2c0 12 8 c\n")
     #ser.write("wr 2c0 12 8 d\n")
-    ser.write("wr 2c0 d28\n")
+    ser.write("wr 2c0 a28\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
     
 	
@@ -223,9 +227,14 @@ def setup_DUT():
     ser.write("d 20\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
-    print ("Gain and Offset...\n")
+    ser.write("rffe_wrreg f 1 9c\n")
+    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+	
+	
+	#TODO: Put back later after finish testing board 53-0012-01
+    #print ("Gain and Offset...\n")
     #ser.write("d 27 -31 -36 904 914 0 -6\n")
-    ser.write("d 27 -14 11 4 14 0 -7\n")
+    #ser.write("d 27 -14 11 4 14 0 -7\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
     return ser
@@ -247,6 +256,8 @@ def main():
     #User input to get the gain range
     gain_start = input ("Gain start: ")
     gain_stop = input ("Gain stop: ")
+    gain_rb_offset = input ("rb_offset: ")
+
 	
     
 	#Setting up DUT before sending PUSCH signal
@@ -267,28 +278,29 @@ def main():
 		
             RB = row ['rb']
             HEX = row['hex']
+			
 
             #Sending PUSCH signal with inputed RB, gain, scale
 			#Form: d 35 12 0 98ff
             print("PUSCH command...\n")
-            ser.write("d 35 " + str(RB) + " 0 " + str(HEX) + "\n")
+            ser.write("d 35 " + str(RB) + " " + str(gain_rb_offset) + " "+ str(HEX) + "\n")
             print("DUT response: " + ser.read(BLOCK_READ_SIZE))
        
 	        #Second loop to sweep through the gain 
             for gain in xrange (gain_start, gain_stop + 1):
                 ser.write("d 26 " + str(gain) + "\n")
-			
+                ser.write("wr 242 4444\n")
 			    # this is a simple conceptual calibration procedure
                 scpi = setup_connection()
 	
 	            #Measure the avg_power and txquality
-                tx_results = measure_tx(RB, HEX, gain)
+                tx_results = measure_tx(RB, HEX, gain, gain_rb_offset)
                 
                 #Temporary stop procedure (uncomment to use!)
                 #Close socket connection to enable GUI access
                 #Ask for raw_input to temporarily pause execution
-                scpi.close()    
-                raw_input("\n\n\tPress a key to Continue\t\n\n")
+                #scpi.close()    
+                #raw_input("\n\n\tPress a key to Continue\t\n\n")
 		
                 #Writes header if there is none
                 if not os.path.isfile(CSV):
@@ -306,13 +318,13 @@ def main():
 				
     #Trying to reorder the file, by setting the columns
     fieldnames = [
-    "nRB Value", "Hex Value", "Gain Value", "Average Power (dBm)", "Average IQ Offset (dB)",
+    "nRB Value", "RB Offset", "Hex Value", "Gain Value", "Average Power (dBm)", "Average IQ Offset (dB)",
     "Average Frequency Error (Hz)","Average Data EVM (%)",
     "Average Peak Data EVM (%)",
     "Average RS EVM (%)","Average Peak RS EVM (%)", "Average IQ Imbalance Gain (dB)",
     "Average IQ Imbalance Phase (deg)", "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)"]
 
-    with open(CSV,'rb') as original, open (ORD_CSV, 'ab') as ordered:
+    with open(CSV,'rb') as original, open (ORD_CSV, 'wb') as ordered:
         wr = csv.DictWriter(ordered, fieldnames = fieldnames)
         wr.writeheader()
         for row in csv.DictReader(original):

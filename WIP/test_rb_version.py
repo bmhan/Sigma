@@ -111,7 +111,7 @@ def measure_tx(rb, hex):
     #Printing the result of the TXQuality test to the command line
     print ("\nRB Value : \t\t\t\t" + str(rb))
     print ("\nHex Value: \t\t\t\t" + str(hex))
-    print ("\nStatus Code: \t\t\t\t" + str(float(txq_array[0])))
+    print ("\nStatus Code: \t\t\t\t" + str(float("{0:.2f}".format(float(txq_array[0])))))
     print ("\nAverage Power (dBm): \t\t\t" + str(float(result_dict['Average Power (dBm)'])))
     print ("Average_IQ_Offset (dB): \t\t" + str(float(txq_array[1])))
     print ("Average_Frequency_Error (Hz): \t\t" + str(float(txq_array[2])))
@@ -127,7 +127,7 @@ def measure_tx(rb, hex):
     #result_dict['Status_Code'] = txq_array[0]
     result_dict['nRB Value'] = str(rb)
     result_dict['Hex Value'] = str(hex)
-    result_dict['Average IQ Offset (dB)'] = float(txq_array[1])
+    result_dict['Average IQ Offset (dB)'] = float("{0:.2f}".format(float(txq_array[1])))
     result_dict['Average Frequency Error (Hz)'] = float(txq_array[2])
     result_dict['Average Data EVM (%)'] = float(txq_array[3])
     result_dict['Average Peak Data EVM (%)'] = float(txq_array[4])
@@ -216,6 +216,9 @@ def setup_DUT():
 	
     print ("Tx...\n")
     ser.write("d 20\n")
+    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+	
+    ser.write("rffe_wrreg f 1 9c\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
     #print ("Gain and Offset...\n")
