@@ -24,7 +24,7 @@ VSA_FREQ = 782e6
 INPUT_CSV = 'input_rb_hex.csv'
 #VSA_REF_LEVEL = 2
 BLOCK_READ_SIZE = 1024
-freq_array = [0,1,2,3,4,5,6,7,8,9,10, 'a', 'b', 'c', 'd', 'e', 'f', '1f']
+freq_array = [0,1,2,3,4,5,6,7,8,9,'a', 'b', 'c', 'd', 'e', 'f', '1f']
 #RB_ARRAY = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,
 #50,54,60,64,72,75,80,81,90,96,100]
 #RB_ARRAY = [1,2,6]
@@ -36,6 +36,7 @@ return:
     If the signal frequency is within +/- 1000 Hz 
 """
 def measure_tx(): 
+
     print ("Performing Single Analysis...\n")
     # setup VSA, this can be done just once per signal type
     # assuming immediate trigger at the moment
@@ -78,53 +79,25 @@ def measure_tx():
 	
     # Calculate and fetch Average Power
 	# Note that the result takes into account cable loss
-    scpi.send('LTE; CLE:ALL; CALC:POW 0,2')
+    scpi.send('LTE; CLE:ALL; CALC:POW 0,20')
+    time.sleep(0.1)
     ret2 = scpi.send('*WAI; SYST:ERR:ALL?')
 	
-    scpi.send('CALC:TXQ 0,1')
+    scpi.send('CALC:TXQ 0,10')
+    time.sleep(0.1)
     ret3 = scpi.send('*WAI; SYST:ERR:ALL?')
     txq_array = scpi.send('FETC:TXQ:AVER?').replace(';', '').split(',')
 	
     print ("Average_Frequency_Error: \t" + str(float(txq_array[2])))
+    """
     #if int(power_arr[0]) == 0 and int(txq_array[0]) == 0:
     if float(txq_array[2]) < 1000 and float (txq_array[2]) > -1000:
         return True	
     else:
         return False
-
+    """
+    return int(txq_array[2])
 	
-    
-
-
-"""
-Function plays a .iqvsg file as the VSG
-param:
-    waveform_file - The nameof the waveform file to play
-"""
-def play_waveform(waveform_file):
-    # enable port RF1A with VSG
-    print ("Loading the waveform " + waveform_file + "...\n")
-    scpi.send('VSG; WAVE:LOAD "/USER/' + waveform_file + '"')
-    scpi.send('VSG; WAVE:EXEC ON')
-    ret = scpi.send('*WAI; SYST:ERR:ALL?')
-    print ("Status: ", ret)
-
-
-
-"""
-Function setups the vsg
-param:
-    frequency - frequency to set the VSG
-    power - power to set the VSG
-"""
-def setup_vsg(frequency, power):
-    print ("Setting up the VSG with frequency " + str(frequency) +
-    " and power " + str(power) + "...\n")
-    scpi.send('VSG; FREQ ' + str(frequency))
-    scpi.send('POW:LEV ' + str(power))
-    ret = scpi.send('*WAI; SYST:ERR:ALL?')
-    print ("Status: ", ret)
-
 
 
 """
@@ -159,15 +132,6 @@ def setup_DUT():
     ser.write("d 9\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
-    """
-    print ("Writing 2c0...\n")
-    #ser.write("wr 2c0 c28\n")
-    #ser.write("wr 2c0 12 8 c\n")
-    #ser.write("wr 2c0 12 8 d\n")
-    ser.write("wr 2c0 d28\n")
-    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-    """
-	
     print ("Tx...\n")
     ser.write("d 20\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
@@ -193,8 +157,9 @@ Main method performs the following:
 """
 def main():
 
-    freq_found = False
-	
+    freq_curr = 100000
+    freq_char = ''
+
 	#Setting up DUT before sending PUSCH signal
     ser = setup_DUT()
 
@@ -220,28 +185,25 @@ def main():
 	
         
 	    #Measure the avg_power and txquality
-        freq_found = measure_tx()
+        freq_err = measure_tx()
 		
-        if freq_found == True:
-            print ("Your crystal value is " + str(CSW_XOSC))    
-            break
-            
+        #Temporary stop procedure (uncomment to use)
+        #Close socket connection to enable GUI access
+        #Ask for raw_input to temporarily pause execution
+        #scpi.close()    
+        #raw_input("\n\n\tPress a key to Continue\t\n\n")
 
+        if abs(freq_err) < abs(freq_curr):
+            freq_curr = freq_err
+            freq_char = CSW_XOSC
+
+        print ("Your frequency set value is " + freq_char + 
+                " with an average frequency error of " + freq_curr)
         #TODO May need delay in the case that there is enough time to
         # do the calculation...
 
-    if freq_found == False:
-        print ("Your crystal value not found")
                 
-            #Temporary stop procedure (uncomment to use)
-            #Close socket connection to enable GUI access
-            #Ask for raw_input to temporarily pause execution
-            #scpi.close()    
-            #raw_input("\n\n\tPress a key to Continue\t\n\n")
-
 				
-
-
 """
     Automatic execution of main method on run of the script
 """
