@@ -1,4 +1,5 @@
 #Notes on the sample code files
+7/11/17
 
 4 methods:
         measure_tx
@@ -20,3 +21,145 @@ will expect a return value. Following the send.
 
 Need to encapsulate the reconfiguration into a setup method, because of overuse
 throughout the code.
+
+------------------------------------------------------------------------------
+7/13/17
+
+Need to write down all the outputs of Litepoint into the csv file
+Requires that we write down all the data point names AND units in the header
+Possibly need two headers? (prob not)
+
+BASIC:
+Figure out what we need as inputs, and how to build an early version to
+accept input
+
+DESIRED:
+Use csv to read in the inputs from the excel document, downloading the data
+as .csv file, use the inputs we want to adjust the registers as desired, run
+the test, store the result of the test into another csv file, making SURE
+to include the input information that is relevant so that the data is legible
+
+Questionable:
+How much user input do we need (how much to automate?)
+Do we rewrite the same file or start a new one?
+
+Using DictReader, each entry in the column is indexed by the name of the column
+You can then get the specific values from a column by using the header name
+(which makes sense more logically) over accessing them through int index
+------------------------------------------------------------------------------
+
+7/14/17
+
+Loop functions properly if no reinitialization is performed (???)
+
+  Answer is not yet; the signal must change
+
+Remember to check if changing the nRB value changes the waveform
+  Must wait for the above
+
+Still need to figure out information in TX Power Control Table and TX Power
+Control Implementation Notes for more input features.
+
+Question: Do we need to append the files, or do we delete them for each new
+iteration?
+  Currently, we are appending to the existing files
+
+TODO:
+  ? Implement Logic so that in the case of failure, we repeat the test 
+  Something like, an if condition, followed by a return of another call to
+  measure_tx?
+  ?
+
+  Setting 5bc : wr 5bc 2 0 x ( x being from 0 to 7)
+
+TeamViewer:
+  ID: 580 951 205
+  PW: 9688
+
+------------------------------------------------------------------------------
+7/17/17
+Implement the Error Code check so that if the license error (or any other error)
+is encountered, we rerun the check until it passes
+
+Put the power less into a file, and read that value as the power loss.
+Use 11 for now.
+Power_Loss_Offset : 11
+
+
+Implement the reset.
+
+Measure the ACLR: the E-Ultra(///)
+
+Implement the data and time of the test
+
+The Litepoint commands CANNOT Have any spaces
+
+Implement inner for loop with gain sweeping.
+
+Figure out how to get the E-UTRA low and high
+
+#XYB = #288
+#228
+#248
+#513108
+  Y has 2 bytes
+  B has 8 bytes:
+
+
+------------------------------------------------------------------------------
+7/18/17
+
+Implemented the staggered entry
+Implement the Error Code check in case of license error
+Implement the date and time of the test
+Implement reading power_loss from a file (probably better from user input?)
+        Actually, it depends on the exact specific value of the power loss.
+Implement an increased number of tests (change the "slot count"?)
+
+
+Implementing a check to find the correct frequency (within +/- 1000Hz) 
+
+Use strftime to format the date object, which is possible because the date
+object is stored in a format that knows which place is every valuelocated.
+
+ADVICE:
+        Section 8.4 is chock full of standard procedure and example code
+
+        In rewriting a file, you want to "write" if u want to overwrite the
+        file completely. Sometimes u want to do this (the ordered copy of the
+        first output file)
+
+        One subframe = 2 timeslots = 1 ms to compute
+
+        We will need to increase the delay as we add more tests
+        Looks one "full frame" = 10 subframes + 3 subframes =
+        20 time slots + 6 time slots  = 10 ms + 3 ms
+
+        May need to use the below command to increase capture time accordingly
+        VSA;CAPTure:TIME <secs>
+
+        Also: Will need possibly add more delay to the Python code, due to delay
+        of information transfer, the delay of the capture, the possibly delay
+        of information return, and the speed of execution of the next command
+
+        1 6 12 24
+
+Make it so that each time you run the program, you change the name of
+the file so you don't constantly have to rename.
+
+Probably going to keep the gain range consistent (4 - 70).
+
+Before you go on, make a new version, because it now revolves around 
+        rb_offset and the rb.
+
+See if removing all the print statements significantly improve runtime
+speed
+(HINT: It probably will)
+
+Do like a prompt: enable comments?
+
+
+------------------------------------------------------------------------------
+7/19/17
+
+GUI
