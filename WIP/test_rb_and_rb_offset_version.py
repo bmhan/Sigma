@@ -16,6 +16,7 @@
 # -----------------------------------------------------------------------------
 import socket_interface as scpi
 import serial
+import datetime
 import time
 import csv
 import os
@@ -29,8 +30,10 @@ INPUT_CSV = 'input_rb_hex.csv'
 GAIN_START = 4
 GAIN_STOP = 70
 BLOCK_READ_SIZE = 1024
-CSV = 'test_gain_rb_result.csv'
-ORD_CSV = 'test_gain_rb_result_ordered.csv'
+
+#Set this value if u want more debug statements
+DEBUG = False
+
 #RB_ARRAY = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,
 #50,54,60,64,72,75,80,81,90,96,100]
 #RB_ARRAY = [1,2,6]
@@ -82,7 +85,8 @@ def measure_tx(rb, hex, gain, rb_offset):
     
 	#Delay in between initializing capture and calculation
     time.sleep(0.1)
-    print ("Capture status: " + ret)
+    if (DEBUG == True):
+        print ("Capture status: " + ret)
 
     #Calculating and fetching Average Power
 	#Note that this result takes into account cable loss
@@ -90,7 +94,8 @@ def measure_tx(rb, hex, gain, rb_offset):
     scpi.send('LTE; CLE:ALL; CALC:POW 0,20')
     time.sleep(0.1)
     ret2 = scpi.send('*WAI; SYST:ERR:ALL?')
-    print ("Average Power Calculation status: " + ret2)
+    if (DEBUG == True):
+        print ("Average Power Calculation status: " + ret2)
     power_arr = scpi.send('FETC:POW:AVER?').replace(';', '').split(',')
     result_dict['Average Power (dBm)'] = float(power_arr[1]) + CABLE_LOSS_DB  
 	
@@ -99,36 +104,39 @@ def measure_tx(rb, hex, gain, rb_offset):
     scpi.send('CALC:TXQ 0,10')
     time.sleep(0.1)
     ret3 = scpi.send('*WAI; SYST:ERR:ALL?')
-    print ("TXQuality status: " + ret3)
+    if (DEBUG == True):
+        print ("TXQuality status: " + ret3)
     txq_array = scpi.send('FETC:TXQ:AVER?').replace(';', '').split(',')
     
 	
     #Calculating Spectrum and fetching E-UTRA Lower and Upper
     scpi.send('CALC:SPEC 0,20')
     ret4 = scpi.send('*WAI; SYST:ERR:ALL?')
-    print ("ACLR status: " + ret4)
+    if (DEBUG == True):
+        print ("ACLR status: " + ret4)
     time.sleep(0.1)
     scpi.send('FORM:READ:DATA ASC')
-    aclr_array = scpi.send('FETC:ACLR?').replace(';', '').split(',')
+    aclr_array = scpi.send('FETC:ACLR:AVER?').replace(';', '').split(',')
     
    
     #Printing the result of the TXQuality test to the command line
-    print ("\nRB Value: \t\t\t\t" + str(rb))
-    print ("\nRB Offset: \t\t\t\t" + str(rb_offset))
-    print ("\nHex Value: \t\t\t\t" + str(hex))
-    print ("\nGain Value: \t\t\t\t" + str(gain))
-    print ("\nStatus Code: \t\t\t\t" + str(float(txq_array[0])))
-    print ("\nAverage Power (dBm): \t\t\t" + str(float(result_dict['Average Power (dBm)'])))
-    print ("Average_IQ_Offset (dB): \t\t" + str(float(txq_array[1])))
-    print ("Average_Frequency_Error (Hz): \t\t" + str(float(txq_array[2])))
-    print ("Average_Data_EVM (%): \t\t\t" + str(float(txq_array[3])))
-    print ("Average_Peak_Data_EVM (%): \t\t" + str(float(txq_array[4])))
-    print ("Average_RS_EVM (%): \t\t\t" + str(float(txq_array[5])))
-    print ("Average_Peak_RS_EVM (%): \t\t" + str(float(txq_array[6])))
-    print ("Average_Amplitude_Imbalance (dB): \t" + str(float(txq_array[7])))
-    print ("Average_Phase_Imbalance (deg): \t\t" + str(float(txq_array[8])))
-    print ("ACLR E-UTRA Lower (dB): \t\t" + str(float(aclr_array[2])))
-    print ("ACLR E-UTRA Upper (dB): \t\t" + str(float(aclr_array[3])))
+    if (DEBUG == True):
+        print ("\nRB Value: \t\t\t\t" + str(rb))
+        print ("\nRB Offset: \t\t\t\t" + str(rb_offset))
+        print ("\nHex Value: \t\t\t\t" + str(hex))
+        print ("\nGain Value: \t\t\t\t" + str(gain))
+        print ("\nStatus Code: \t\t\t\t" + str(float(txq_array[0])))
+        print ("\nAverage Power (dBm): \t\t\t" + str(float(result_dict['Average Power (dBm)'])))
+        print ("Average_IQ_Offset (dB): \t\t" + str(float(txq_array[1])))
+        print ("Average_Frequency_Error (Hz): \t\t" + str(float(txq_array[2])))
+        print ("Average_Data_EVM (%): \t\t\t" + str(float(txq_array[3])))
+        print ("Average_Peak_Data_EVM (%): \t\t" + str(float(txq_array[4])))
+        print ("Average_RS_EVM (%): \t\t\t" + str(float(txq_array[5])))
+        print ("Average_Peak_RS_EVM (%): \t\t" + str(float(txq_array[6])))
+        print ("Average_Amplitude_Imbalance (dB): \t" + str(float(txq_array[7])))
+        print ("Average_Phase_Imbalance (deg): \t\t" + str(float(txq_array[8])))
+        print ("ACLR E-UTRA Lower (dB): \t\t" + str(float(aclr_array[2])))
+        print ("ACLR E-UTRA Upper (dB): \t\t" + str(float(aclr_array[3])))
 
 	
 	#Storing the results to be written to the .csv file
@@ -146,7 +154,8 @@ def measure_tx(rb, hex, gain, rb_offset):
     result_dict['Average IQ Imbalance Phase (deg)'] = float(txq_array[8])
     result_dict['ACLR E-UTRA Lower (dB)'] = float (aclr_array[2])
     result_dict['ACLR E-UTRA Upper (dB)'] = float (aclr_array[3])
-    
+    result_dict['Date & Time'] =  datetime.datetime.strftime(
+    datetime.datetime.now(), '%B %w, %Y  %H:%M:%S')  
     return result_dict
     
 	
@@ -258,7 +267,6 @@ def main():
     #gain_stop = input ("Gain stop: ")
     gain_rb_offset = input ("rb_offset: ")
 
-	
     
 	#Setting up DUT before sending PUSCH signal
     ser = setup_DUT()
@@ -279,7 +287,9 @@ def main():
             RB = row ['rb']
             HEX = row['hex']
             CSV = 'output_rb_' + str(RB) + "_rb_offset_" + str(gain_rb_offset)
-            + '_range_4_70'
+            + '_gain_4_70.csv'
+            ORD_CSV = 'output_rb_' + str(RB) + "_rb_offset_" + str(gain_rb_offset)
+            + '_gain_4_70_ordered.csv'
 
             #Sending PUSCH signal with inputed RB, gain, scale
 			#Form: d 35 12 0 98ff
@@ -290,11 +300,21 @@ def main():
 	        #Second loop to sweep through the gain 
             for gain in xrange (GAIN_START, GAIN_STOP + 1):
 
+                if (DEBUG == True):
+                    print ("Setting gain...")
+
                 ser.write("d 26 " + str(gain) + "\n")
 
-                print ("Writing to 242...")
+                if (DEBUG == True):
+                    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+
+                if (DEBUG == True):
+                    print ("Writing to 242...")
+
                 ser.write("wr 242 4444\n")
-                print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+
+                if (DEBUG == True):
+                    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 
 			    # this is a simple conceptual calibration procedure
                 scpi = setup_connection()
@@ -302,7 +322,7 @@ def main():
 	            #Measure the avg_power and txquality
                 tx_results = measure_tx(RB, HEX, gain, gain_rb_offset)
                 
-                #Temporary stop procedure (uncomment to use!)
+                #Stop procedure (uncomment to use!)
                 #Close socket connection to enable GUI access
                 #Ask for raw_input to temporarily pause execution
                 #scpi.close()    
@@ -324,11 +344,12 @@ def main():
 				
     #Trying to reorder the file, by setting the columns
     fieldnames = [
-    "nRB Value", "RB Offset", "Hex Value", "Gain Value", "Average Power (dBm)", "Average IQ Offset (dB)",
-    "Average Frequency Error (Hz)","Average Data EVM (%)",
-    "Average Peak Data EVM (%)",
-    "Average RS EVM (%)","Average Peak RS EVM (%)", "Average IQ Imbalance Gain (dB)",
-    "Average IQ Imbalance Phase (deg)", "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)"]
+    "nRB Value", "RB Offset", "Hex Value", "Gain Value", "Average Power (dBm)",
+    "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
+    "Average Data EVM (%)", "Average Peak Data EVM (%)",
+    "Average RS EVM (%)","Average Peak RS EVM (%)",
+    "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
+    "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Date & Time"]
 
     with open(CSV,'rb') as original, open (ORD_CSV, 'wb') as ordered:
         wr = csv.DictWriter(ordered, fieldnames = fieldnames)
