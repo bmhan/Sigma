@@ -25,6 +25,7 @@ INPUT_CSV = 'input_rb_hex.csv'
 #VSA_REF_LEVEL = 2
 BLOCK_READ_SIZE = 1024
 freq_array = [0,1,2,3,4,5,6,7,8,9,'a', 'b', 'c', 'd', 'e', 'f', '1f']
+#freq_array = ['a', 'b', 'c', 'd', 'e', 'f', '1f']
 #RB_ARRAY = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,
 #50,54,60,64,72,75,80,81,90,96,100]
 #RB_ARRAY = [1,2,6]
@@ -96,7 +97,7 @@ def measure_tx():
     else:
         return False
     """
-    return int(txq_array[2])
+    return int(float(txq_array[2]))
 	
 
 
@@ -124,7 +125,7 @@ Function sets up the DUT to transmit the signal
 def setup_DUT():
 
     #Establish connection to DUT
-    ser = serial.Serial('COM5', 115200, timeout = 5)
+    ser = serial.Serial('COM8', 115200, timeout = 5)
 
 	
 	
@@ -157,6 +158,9 @@ Main method performs the following:
 """
 def main():
 
+    #One connection test
+    scpi = setup_connection()
+    
     freq_curr = 100000
     freq_char = ''
 
@@ -166,10 +170,11 @@ def main():
     print("Setting up RB and scale, sending PUSCH signal...\n")
     ser.write("d 35 " + str(16) + " 0 " + "179C\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-            
-    print ("Gain and Offset...\n")
-    ser.write("d 27 -14 11 4 14 0 -7\n")
-    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+     
+    #Put back in when you swithc back to ur board
+    #print ("Gain and Offset...\n")
+    #ser.write("d 27 -14 11 4 14 0 -7\n")
+    #print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
     for CSW_XOSC in freq_array:
         print ("Writing 2c0 "+ str(CSW_XOSC) + "28...\n")
@@ -181,7 +186,7 @@ def main():
         # print("DUT response: " + ser.read(BLOCK_READ_SIZE))		
 
         # this is a simple conceptual calibration procedure
-        scpi = setup_connection()
+        #scpi = setup_connection()
 	
         
 	    #Measure the avg_power and txquality
@@ -197,8 +202,7 @@ def main():
             freq_curr = freq_err
             freq_char = CSW_XOSC
 
-        print ("Your frequency set value is " + freq_char + 
-                " with an average frequency error of " + freq_curr)
+    print ("Your frequency set value is " + str(freq_char) + " with an average frequency error of " + str(freq_curr))
         #TODO May need delay in the case that there is enough time to
         # do the calculation...
 
