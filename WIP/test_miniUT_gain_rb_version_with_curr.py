@@ -1,8 +1,8 @@
 # -----------------------------------------------------------------------------
-# Name:        test_rb_and_rb_offset_version
+# Name:        test_miniUT_gain_rb_version_with_curr
 # Purpose:     Get the TXQuality data, sweeping the gains for an rb and rb offset
-# Created:     7/19/2017
-# Last Updated: 7/18/2017
+# Created:     7/20/2017
+# Last Updated: 7/21/2017
 #
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
 # test_gain_rb_version configures the Litepoint IQxstream machine to analyze the
@@ -21,6 +21,7 @@ import datetime
 import time
 import csv
 import os
+import test_crystal
 
 HOST = '10.10.14.202'
 PORT = 24000
@@ -28,13 +29,17 @@ VSA_FREQ = 782e6
 CABLE_LOSS_DB = 11
 VOLT = 2.5
 CURR_LIMIT = 2
+DUT = "miniUT Rev E8"
+SN = "25"
 INPUT_CSV = 'input_rb_hex.csv'
-#VSA_REF_LEVEL = 2
 GAIN_START = 4
 GAIN_STOP = 70
 BLOCK_READ_SIZE = 1024
+RB = 0
+HEX = 0
+table = [0,1,2,3,4,5,10,20,30,40,50,60,70]
 
-#Set this value if u want more debug statements
+#Set this value to True if you want more debug statements
 DEBUG = False
 
 #RB_ARRAY = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,
@@ -45,8 +50,10 @@ DEBUG = False
 """
 Function returns a dictionary of information on a given signal.
 params:
-    freq - The frequency of the VSA
-    reference_level - The reference level of VSA
+    rb - The RB value
+    hex - The scale
+    rb_offset - The start rb offset
+    power_supply - The power supply
 return: 
     Dictionary of information 
 """
@@ -54,10 +61,6 @@ def measure_tx(rb, hex, gain, rb_offset,power_supply):
  
     print ("Performing Analysis for rb " + str(rb) + "\thex " + str(hex) + "\tgain " + str(gain) + "\trb offset " + str(rb_offset) + "...\n")
 
-	
-	# setup freq and ref. level
-    #scpi.send('VSA; FREQ ' + str(freq))
-    #scpi.send('RLEV ' + str(reference_level))
 
     #Settings setup (taken from the SCPI Console)
 	#CHAN1;LTE;CONF:RBC AUTO
@@ -86,7 +89,6 @@ def measure_tx(rb, hex, gain, rb_offset,power_supply):
     ret = scpi.send('*WAI; SYST:ERR:ALL?')
     
 	#Delay in between initializing capture and calculation
-    #time.sleep(0.1)
     if (DEBUG == True):
         print ("Capture status: " + ret)
 
@@ -94,17 +96,15 @@ def measure_tx(rb, hex, gain, rb_offset,power_supply):
 	#Note that this result takes into account cable loss
     result_dict = {}
     scpi.send('LTE; CLE:ALL; CALC:POW 0,20')
-    #time.sleep(0.1)
     ret2 = scpi.send('*WAI; SYST:ERR:ALL?')
     if (DEBUG == True):
         print ("Average Power Calculation status: " + ret2)
     power_arr = scpi.send('FETC:POW:AVER?').replace(';', '').split(',')
-    result_dict['Average Power (dBm)'] = float('{0:.2f}'.format(float(power_arr[1]))) + CABLE_LOSS_DB  
+    result_dict['Average Power (dBm)'] = round(round(float(power_arr[1]),2),2) + CABLE_LOSS_DB  
 	
     
 	#Calculating and fetching TXQuality
     scpi.send('CALC:TXQ 0,10')
-    #time.sleep(0.1)
     ret3 = scpi.send('*WAI; SYST:ERR:ALL?')
     if (DEBUG == True):
         print ("TXQuality status: " + ret3)
@@ -116,17 +116,18 @@ def measure_tx(rb, hex, gain, rb_offset,power_supply):
     ret4 = scpi.send('*WAI; SYST:ERR:ALL?')
     if (DEBUG == True):
         print ("ACLR status: " + ret4)
-    #time.sleep(0.1)
     scpi.send('FORM:READ:DATA ASC')
     ret5 = scpi.send('*WAI; SYST:ERR:ALL?')
     if (DEBUG == True):
         print ("ACLR status: " + ret5)
     aclr_array = scpi.send('FETC:ACLR?').replace(';', '').split(',')
     
+    #Measure the voltage
     power_supply.write(":MEAS:VOLT? ")
     time.sleep(0.1)
     voltage = float(power_supply.read())
     
+    #Measure the current
     power_supply.write(":MEAS:CURR? ")
     time.sleep(0.1)
     current = float(power_supply.read())
@@ -155,24 +156,24 @@ def measure_tx(rb, hex, gain, rb_offset,power_supply):
 
 	
 	#Storing the results to be written to the .csv file
-    result_dict['nRB Value'] = rb
-    result_dict['Hex Value'] = hex
+    #result_dict['nRB Value'] = rb
+    #result_dict['Hex Value'] = hex
     result_dict['Gain Value'] = gain
-    result_dict['RB Offset'] = rb_offset
-    result_dict['Average IQ Offset (dB)'] = float('{0:.2f}'.format(float(txq_array[1])))
-    result_dict['Average Frequency Error (Hz)'] = float('{0:.2f}'.format(float(txq_array[2])))
-    result_dict['Average Data EVM (%)'] = float('{0:.2f}'.format(float(txq_array[3])))
-    result_dict['Average Peak Data EVM (%)'] = float('{0:.2f}'.format(float(txq_array[4])))
-    result_dict['Average RS EVM (%)'] = float('{0:.2f}'.format(float(txq_array[5])))
-    result_dict['Average Peak RS EVM (%)'] = float('{0:.2f}'.format(float(txq_array[6])))
-    result_dict['Average IQ Imbalance Gain (dB)'] = float('{0:.2f}'.format(float(txq_array[7])))
-    result_dict['Average IQ Imbalance Phase (deg)'] = float('{0:.2f}'.format(float(txq_array[8])))
-    result_dict['ACLR E-UTRA Lower (dB)'] = float('{0:.2f}'.format(float(aclr_array[2])))
-    result_dict['ACLR E-UTRA Upper (dB)'] = float('{0:.2f}'.format(float(aclr_array[3])))
-    result_dict['Voltage (V)'] = float('{0:.2f}'.format(float(voltage)))
-    result_dict['Current (A)'] = float('{0:.2f}'.format(float(current)))
-    result_dict['Date & Time'] =  datetime.datetime.strftime(
-    datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S')  
+    #result_dict['RB Offset'] = rb_offset
+    result_dict['Average IQ Offset (dB)'] = round(float(txq_array[1]),2)
+    result_dict['Average Frequency Error (Hz)'] = round(float(txq_array[2]),2)
+    result_dict['Average Data EVM (%)'] = round(float(txq_array[3]),2)
+    result_dict['Average Peak Data EVM (%)'] = round(float(txq_array[4]),2)
+    result_dict['Average RS EVM (%)'] = round(float(txq_array[5]),2)
+    result_dict['Average Peak RS EVM (%)'] = round(float(txq_array[6]),2)
+    result_dict['Average IQ Imbalance Gain (dB)'] = round(float(txq_array[7]),2)
+    result_dict['Average IQ Imbalance Phase (deg)'] = round(float(txq_array[8]),2)
+    result_dict['ACLR E-UTRA Lower (dB)'] = round(float(aclr_array[2]),2)
+    result_dict['ACLR E-UTRA Upper (dB)'] = round(float(aclr_array[3]),2)
+    #result_dict['Voltage (V)'] = float('{0:.2f}'.format(float(voltage)))
+    result_dict['Current (A)'] = round(float(current),2)
+    #result_dict['Date & Time'] =  datetime.datetime.strftime(
+    #datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S')  
     return result_dict
     
 	
@@ -234,7 +235,7 @@ def setup_connection ():
 """
 Function sets up the DUT to transmit the signal
 """
-def setup_DUT():
+def setup_DUT(csw):
 
     #Establish connection to DUT
     ser = serial.Serial('COM8', 115200, timeout = 5)
@@ -245,11 +246,9 @@ def setup_DUT():
     ser.write("d 9\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
+    
     print ("Writing 2c0...\n")
-    #ser.write("wr 2c0 c28\n")
-    #ser.write("wr 2c0 12 8 c\n")
-    #ser.write("wr 2c0 12 8 d\n")
-    ser.write("wr 2c0 b28\n")
+    ser.write("wr 2c0 " + str(csw) + "28\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
     
 	
@@ -257,10 +256,12 @@ def setup_DUT():
     ser.write("d 20\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
-    ser.write("rffe_wrreg f 1 9c\n")
-    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+	#Set the PA bias to 9c
+    #ser.write("rffe_wrreg f 1 9c\n")
+    #print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
 	
+	#TODO: Remove later when testing board 53-0012-01
     #print ("Gain and Offset...\n")
     #ser.write("d 27 -31 -36 904 914 0 -6\n")
     #ser.write("d 27 -14 11 4 14 0 -7\n")
@@ -268,8 +269,8 @@ def setup_DUT():
 	
     return ser
 	
-	
-	
+
+
 """
 Main method performs the following:
 	Set up the DUT board to transmit
@@ -281,13 +282,20 @@ Main method performs the following:
 	files
 """
 def main():
-    #User input to get the gain range
+
+    print("\nPerforming test for CSW (2c0)...\n")
+    #CSW = test_crystal.main()
+    CSW = 'c'
+    
+    #User input to get the rb offset
     gain_rb_offset = input ("rb_offset: ")
+    
     
     #Setting up the Power Supply
     rm = visa.ResourceManager()
     power_supply = rm.open_resource('GPIB0::9::INSTR')
     
+    #Setting output 1
     print ("Setting output 1...")
     power_supply.write(":INSTrument:SELect OUT1")
     time.sleep(0.1)
@@ -306,9 +314,10 @@ def main():
     
     
 	#Setting up DUT before sending PUSCH signal
-    ser = setup_DUT()
-
+    ser = setup_DUT(CSW)
     
+
+  
     #Iterates throught the array of RB values, performing
     #and storing the TX Quality calculations
     with open (INPUT_CSV, "rb") as file:
@@ -316,19 +325,16 @@ def main():
         for row in reader:
 	#for rb in RB_ARRAY:   
 		
-	    #set RB form: d 34 (your num here) 0\n
-        #print ("\nSending PUSCH...\n")
-        #ser.write("d 34 " + str(rb) + " 0\n")
-        #print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-		
             RB = row ['rb']
             HEX = row['hex']
-            CSV = "rb_" + str(RB) + "_rb_offset_" + str(gain_rb_offset) + "_" + str(VOLT) + "V_" + str(CURR_LIMIT) + "A" + "_gain_4_70.csv"
-            ORD_CSV = "rb_" + str(RB) + "_rb_offset_" + str(gain_rb_offset) + "_" + str(VOLT) + "V_" + str(CURR_LIMIT)+ "A" + "_gain_4_70_ordered.csv"
+            CSV = DUT + "_SN_" + str(SN) + "_rb_" + str(RB) + "_rb_offset_" + str(gain_rb_offset) + ".csv"
+            ORD_CSV = DUT + "_SN_" + str(SN) + "_rb_" + str(RB) + "_rb_offset_" + str(gain_rb_offset) + "ordered.csv"
 
             if os.path.isfile(CSV):
                 os.remove(CSV)
-                
+            
+
+            
             #Sending PUSCH signal with inputed RB, gain, scale
 			#Form: d 35 12 0 98ff
             print("PUSCH command...\n")
@@ -336,13 +342,16 @@ def main():
             print("DUT response: " + ser.read(BLOCK_READ_SIZE))
        
 	        #Second loop to sweep through the gain 
-            for gain in xrange (GAIN_START, GAIN_STOP + 1):
+            #TODO : Switch back to user input with xrange if you want more data points
+            #for gain in xrange (GAIN_START, GAIN_STOP + 1):
+            for gain in table:
 
                 if (DEBUG == True):
                     print ("Setting gain...")
 
                 ser.write("d 26 " + str(gain) + "\n")
 
+                
                 if (DEBUG == True):
                     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 
@@ -353,7 +362,7 @@ def main():
 
                 if (DEBUG == True):
                     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-
+                
 	
 	            #Measure the avg_power and txquality
                 tx_results = measure_tx(RB, HEX, gain, gain_rb_offset, power_supply)
@@ -366,10 +375,11 @@ def main():
                 #scpi = setup_connection()
 		
                 #Writes header if there is none
-                if not os.path.isfile(CSV):
-                   with open (CSV,'ab') as result:
-                       wr = csv.DictWriter(result, tx_results.keys())
-                       wr.writeheader()
+                if not os.path.isfile(CSV):               
+                    with open (CSV,'ab') as result:
+                        wr = csv.DictWriter(result, tx_results.keys())
+                        wr.writeheader()
+                       
 		
                 #Writing the rest of the non-header data to the file
                 with open (CSV,'ab') as result:
@@ -383,6 +393,7 @@ def main():
     time.sleep(0.1)
 	
     #Trying to reorder the file, by setting the columns
+    """
     fieldnames = [
     "Date & Time","nRB Value", "RB Offset", "Hex Value", "Gain Value", "Average Power (dBm)",
     "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
@@ -390,9 +401,30 @@ def main():
     "Average RS EVM (%)","Average Peak RS EVM (%)",
     "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
     "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Voltage (V)", "Current (A)"]
+    """
+    
+    fieldnames = [
+    "Gain Value", "Average Power (dBm)",
+    "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
+    "Average Data EVM (%)", "Average Peak Data EVM (%)",
+    "Average RS EVM (%)","Average Peak RS EVM (%)",
+    "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
+    "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Current (A)"]
 
-    with open(CSV,'rb') as original, open (ORD_CSV, 'wb') as ordered:
+    with open(CSV,'rb') as original, open (ORD_CSV, 'ab') as ordered:
         wr = csv.DictWriter(ordered, fieldnames = fieldnames)
+        #Write starting data to the file
+        file = open(ORD_CSV, 'wb')
+        file.write("Date & Time of Test:\t" + datetime.datetime.strftime(datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S') + "\n") 
+        file.write ("DUT:\t\t\t\t\t"+ DUT + "\n")
+        file.write("SN:\t\t\t\t\t\t" + SN + "\n")
+        file.write ("CSW(2c0):\t\t\t\t" + str(CSW) + "28\n")
+        file.write ("RB:\t\t\t\t\t\t" + str(RB)+ "\n")
+        file.write("Scale:\t\t\t\t\t0x" + str(HEX) + "\n")
+        file.write ("RB Offset:\t\t\t\t" + str(gain_rb_offset) + "\n")
+        file.write("VSS_2V0_3V3:\t\t\t" + str(VOLT) + "V\n")
+        #file.write("\n")
+        file.close()
         wr.writeheader()
         for row in csv.DictReader(original):
             wr.writerow(row)

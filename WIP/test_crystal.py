@@ -2,7 +2,7 @@
 # Name:        test_crystal
 # Purpose:     Get the TXQuality data, sweeping the RB
 # Created:     7/18/2017
-# Last Updated: 7/18/2017
+# Last Updated: 7/21/2017
 #
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
 # test_crystal configures the Litepoint IQxstream machine to analyze the 782 MHz
@@ -10,25 +10,32 @@
 # in register 2c0.
 # The program uses the socket_interface.py to initialize
 # a connection to the board and send and receive data from IQxstream. The serial
-# library is used to communicate to the board for testing.
+# library is used to communicate to the board for testing. The visa library is used
+# to communicate with the power supply to turn it on for the test and off after test
+# is finished.
 # -----------------------------------------------------------------------------
 import socket_interface as scpi
 import serial
 import time
+import visa
 import csv
+import sys
 import os
 
 HOST = '10.10.14.202'
 PORT = 24000
+FREQ_ERROR = 100000
 VSA_FREQ = 782e6
+EVM_LIMIT = 5
 INPUT_CSV = 'input_rb_hex.csv'
 #VSA_REF_LEVEL = 2
 BLOCK_READ_SIZE = 1024
+VOLT = 2.5
+CURR_LIMIT = 2
 freq_array = [0,1,2,3,4,5,6,7,8,9,'a', 'b', 'c', 'd', 'e', 'f', '1f']
 #freq_array = ['a', 'b', 'c', 'd', 'e', 'f', '1f']
 #RB_ARRAY = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,
 #50,54,60,64,72,75,80,81,90,96,100]
-#RB_ARRAY = [1,2,6]
 
 
 """
@@ -90,14 +97,16 @@ def measure_tx():
     txq_array = scpi.send('FETC:TXQ:AVER?').replace(';', '').split(',')
 	
     print ("Average_Frequency_Error: \t" + str(float(txq_array[2])))
+    print ("Average_Data_EVM (%): \t\t\t" + str(float(txq_array[3])))
     """
+    #Depreciated comparison logic
     #if int(power_arr[0]) == 0 and int(txq_array[0]) == 0:
     if float(txq_array[2]) < 1000 and float (txq_array[2]) > -1000:
         return True	
     else:
         return False
     """
-    return int(float(txq_array[2]))
+    return (float(txq_array[2]),float(txq_array[3]))
 	
 
 
@@ -136,7 +145,12 @@ def setup_DUT():
     print ("Tx...\n")
     ser.write("d 20\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-	
+		
+    #TODO: Put back later when testing board 53-0012-01
+    #Set PA Bias Current to 9c 
+    #ser.write("rffe_wrreg f 1 9c\n")
+    #print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+    
     #print ("Gain and Offset...\n")
     #ser.write("d 27 -31 -36 904 914 0 -6\n")
     #ser.write("d 27 -14 11 4 14 0 -7\n")
@@ -157,11 +171,29 @@ Main method performs the following:
 	files
 """
 def main():
-
+    
+    #Setting up the Power Supply
+    rm = visa.ResourceManager()
+    power_supply = rm.open_resource('GPIB0::9::INSTR')
+    
+    print ("Setting output 1...")
+    power_supply.write(":INSTrument:SELect OUT1")
+    time.sleep(0.1)
+    
+    #Setting Power Supply current and limit
+    power_supply.write(":APPL %f, %f" % (VOLT, CURR_LIMIT))
+    time.sleep(0.1)
+    
+    #Turning on output
+    print ("Turning on output...")
+    power_supply.write(":OUTPUT:STATE ON")
+    time.sleep(1)
+    
     #One connection test
     scpi = setup_connection()
     
-    freq_curr = 100000
+    freq_curr = FREQ_ERROR
+    data_curr = EVM_LIMIT
     freq_char = ''
 
 	#Setting up DUT before sending PUSCH signal
@@ -171,7 +203,7 @@ def main():
     ser.write("d 35 " + str(16) + " 0 " + "179C\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
      
-    #Put back in when you swithc back to ur board
+    #Put back in when you switch back to "Brian" board
     #print ("Gain and Offset...\n")
     #ser.write("d 27 -14 11 4 14 0 -7\n")
     #print("DUT response: " + ser.read(BLOCK_READ_SIZE))
@@ -184,13 +216,11 @@ def main():
         #TODO Optional command to check if the registers was actually written
         # ser.write("rd 2c0"\n")
         # print("DUT response: " + ser.read(BLOCK_READ_SIZE))		
-
-        # this is a simple conceptual calibration procedure
-        #scpi = setup_connection()
 	
         
-	    #Measure the avg_power and txquality
-        freq_err = measure_tx()
+	    #Measure the avg_power and txquality and return a tuple containing
+        #the frequency error and the data EVM
+        tuple = measure_tx()
 		
         #Temporary stop procedure (uncomment to use)
         #Close socket connection to enable GUI access
@@ -198,13 +228,26 @@ def main():
         #scpi.close()    
         #raw_input("\n\n\tPress a key to Continue\t\n\n")
 
-        if abs(freq_err) < abs(freq_curr):
-            freq_curr = freq_err
+        if abs(tuple[0]) < abs(freq_curr) and abs (tuple[1]) < 5:
+            freq_curr = tuple[0]
+            data_curr = tuple[1]
             freq_char = CSW_XOSC
 
-    print ("Your frequency set value is " + str(freq_char) + " with an average frequency error of " + str(freq_curr))
-        #TODO May need delay in the case that there is enough time to
-        # do the calculation...
+    #Turning on output
+    print ("Turning off output...")
+    power_supply.write(":OUTPUT:STATE OFF")
+    time.sleep(3)
+    
+    #In the case where a right frequency setting is found, exits the entire script
+    if (freq_curr == FREQ_ERROR):
+        print ("\nNo frequency value found. Now exiting program")
+        sys.exit()
+    
+    
+    print ("\nYour frequency set value is " + str(freq_char) + " with an average frequency error of " + str(freq_curr)\
+           + " and an average Data EVM of " + str(data_curr) + "\n")
+   
+    return freq_char
 
                 
 				
