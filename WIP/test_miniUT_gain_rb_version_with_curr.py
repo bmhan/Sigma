@@ -4,6 +4,7 @@
 # Created:     7/20/2017
 # Last Updated: 7/21/2017
 #
+# CHANGE SN BEFORE EVERY TEST!!!
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
 # test_gain_rb_version configures the Litepoint IQxstream machine to analyze the
 # 782 MHz produced by the board, sweeping the rb values and the gain values. 
@@ -30,7 +31,7 @@ CABLE_LOSS_DB = 11
 VOLT = 2.5
 CURR_LIMIT = 2
 DUT = "miniUT Rev E8"
-SN = "25"
+SN = "21"
 INPUT_CSV = 'input_rb_hex.csv'
 GAIN_START = 4
 GAIN_STOP = 70
@@ -284,8 +285,8 @@ Main method performs the following:
 def main():
 
     print("\nPerforming test for CSW (2c0)...\n")
-    #CSW = test_crystal.main()
-    CSW = 'c'
+    CSW = test_crystal.main()
+    #CSW = 'd'
     
     #User input to get the rb offset
     gain_rb_offset = input ("rb_offset: ")
