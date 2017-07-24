@@ -6,7 +6,7 @@
 #
 # -----------------------------------------------------------------------------
 from Tkinter import *
-import test_miniUT_gain_rb_version_with_cur as tester
+import test_miniUT_crystal_rb as tester
 
 class Example3:
     def __init__ (self, master):
