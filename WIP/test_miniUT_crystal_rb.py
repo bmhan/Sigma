@@ -30,13 +30,13 @@ HOST = '10.10.14.202'
 PORT = 24000
 VSA_FREQ = 782e6
 CABLE_LOSS_DB = 11
-VOLT = 2.5
+VOLT = 5
 CURR_LIMIT = 2
 FREQ_ERROR = 100000
-EVM_LIMIT = 4
+EVM_LIMIT = 6
 CSW = ""
 DUT = "miniUT Rev E8"
-SN = "10"
+SN = "16"
 INPUT_CSV = 'input_rb_hex.csv'
 GAIN_START = 4
 GAIN_STOP = 70
@@ -66,7 +66,7 @@ return:
 """
 def measure_tx(rb, hex, gain, rb_offset,power_supply): 
     if (power_supply != 0):
-        print ("Performing Analysis for rb " + str(rb) + "\thex " + str(hex) + "\tgain " + str(gain) + "\trb offset " + str(rb_offset) + "...\n")
+        print ("Performing Analysis for rb " + str(rb) + "\tscaling " + str(hex) + "\tgain " + str(gain) + "\trb offset " + str(rb_offset) + "...\n")
 
 
     #Settings setup (taken from the SCPI Console)
@@ -250,7 +250,7 @@ Function sets up the DUT to transmit the signal
 def setup_DUT():
 
     #Establish connection to DUT
-    ser = serial.Serial('COM8', 115200, timeout = 5)
+    ser = serial.Serial('COM7', 115200, timeout = 5)
 
     print ("\nInitializing DUT...\n")
     ser.write("d 9\n")
@@ -280,7 +280,7 @@ def setup_DUT():
     #ser.write("d 27 -14 11 4 14 0 -7\n")
     #print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
-    return ser
+    return (ser,CSW)
 	
     
     
@@ -379,7 +379,9 @@ def main():
     
 	#Setting up DUT before sending PUSCH signal
     #Makes a call to setup_crystal
-    ser = setup_DUT()
+    tuple = setup_DUT()
+    ser = tuple[0]
+    CSW = tuple [1]
     
 
   
@@ -453,7 +455,36 @@ def main():
 			
                     wr.writerow(tx_results)
                    
-                
+            fieldnames = [
+    "Gain Value", "Average Power (dBm)",
+    "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
+    "Average Data EVM (%)", "Average Peak Data EVM (%)",
+    "Average RS EVM (%)","Average Peak RS EVM (%)",
+    "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
+    "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Current (A)"]
+
+            with open(CSV,'rb') as original, open (ORD_CSV, 'ab') as ordered:
+                wr = csv.DictWriter(ordered, fieldnames = fieldnames)
+                    #Write starting data to the file
+                file = open(ORD_CSV, 'wb')
+                file.write("Date & Time of Test:\t" + datetime.datetime.strftime(datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S') + "\n") 
+                file.write ("DUT:\t\t\t\t\t"+ DUT + "\n")
+                file.write("SN:\t\t\t\t\t\t" + SN + "\n")
+                file.write ("CSW(2c0):\t\t\t\t" + str(CSW) + "28\n")
+                file.write ("RB:\t\t\t\t\t\t" + str(RB)+ "\n")
+                file.write("Scale:\t\t\t\t\t0x" + str(HEX) + "\n")
+                file.write ("RB Offset:\t\t\t\t" + str(gain_rb_offset) + "\n")
+                file.write("VSS_2V0_3V3:\t\t\t" + str(VOLT) + "V\n")
+                #file.write("\n")
+                file.close()
+                wr.writeheader()
+                for row in csv.DictReader(original):
+                    wr.writerow(row)
+
+            #TODO Remove the unsorted file, and rename the ordered file to the original.
+            os.remove(CSV)
+            os.rename(ORD_CSV,CSV)
+            
     #Turn off the output
     power_supply.write(":OUTPUT:STATE OFF")
     time.sleep(0.1)
@@ -468,7 +499,7 @@ def main():
     "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
     "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Voltage (V)", "Current (A)"]
     """
-    
+    """
     fieldnames = [
     "Gain Value", "Average Power (dBm)",
     "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
@@ -494,10 +525,12 @@ def main():
         wr.writeheader()
         for row in csv.DictReader(original):
             wr.writerow(row)
-
+        
     #TODO Remove the unsorted file, and rename the ordered file to the original.
     os.remove(CSV)
     os.rename(ORD_CSV,CSV)
+    """
+    return True
 
 
 
