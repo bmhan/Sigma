@@ -74,7 +74,7 @@ TODO:
 
 TeamViewer:
   ID: 580 951 205
-  PW: 3961
+  PW: 8771
 
 ------------------------------------------------------------------------------
 7/17/17
@@ -227,6 +227,8 @@ our exit condition?
 ------------------------------------------------------------------------------
 7/24/17
 
+Improve the runtime of test_crystal portion of the test
+
 GUI Notes:
 
 What values can we vary?
@@ -264,3 +266,28 @@ Essentially, what we need is a config file / settings file.
 
 So, it looks like, if we don't do special Tkinter overhead, our data is
 printed to terminal just like normal! That is pretty useful!
+
+In more complex automation, we need to check if the device is connected,
+using Exceptions to return error messages in the case where devices
+are not connected.
+
+It wasn't the writing that took a while; it was the reading!
+
+
+------------------------------------------------------------------------------
+7/25/17
+
+When you make the setter calls inside the GUI, make sure you call it from
+an object, so that your changes go through (? Try)
+
+Pretty much everything in the GUI is an object, so if you want to get 
+values, you need to use .get and .set
+
+Going to create a "black box" testing program, with just basic queues
+to indicate connection failures, and such
+
+We need some kind of console (?) that displays the runtime like I have
+already done, but in the GUI instead of on command line
+
+The validate commands do not work "right". It's no longer disabling the button,
+but the red text part is working properly
