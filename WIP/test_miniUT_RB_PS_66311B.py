@@ -61,15 +61,17 @@ CONNECTION_ERROR = 202
 PS_ERROR = 4
 IMPORT_ERROR = 2
 SERIAL_ERROR = 77
+SPEC_ERROR = 99
 
 #Error Messages
-FREQ_ERROR_MESSAGE = "\nNo frequency value found. Retry Test."
-CALC_ERROR_MESSAGE = "\nLitepoint Calculations Failed."
-CONNECTION_ERROR_MESSAGE = "\nFailed to establish connection to Litepoint.\nCheck Host Address."
-PS_ERROR_MESSAGE = "\nFailed to establish connection to 66311B Power Supply.\nCheck COM and PS Address"
-IMPORT_ERROR_MESSAGE = "\nMissing Libraries. Check that you have \npySerial, pyVisa and NI-VISA installed"
-SERIAL_ERROR_MESSAGE = "\nCould not connect to " + COM + ". \nCheck that your COM # is correct"
-    
+ERROR_END = "\n----------------------------------------------------------------\n"
+FREQ_ERROR_MESSAGE = "No frequency value found. Retry Test."
+CALC_ERROR_MESSAGE = "Litepoint Calculations Failed."
+CONNECTION_ERROR_MESSAGE = "Failed to establish connection to Litepoint.\nCheck Host Address."
+PS_ERROR_MESSAGE = "Failed to establish connection to 66311B Power Supply.\nCheck COM and PS Address"
+IMPORT_ERROR_MESSAGE = "Missing Libraries. Check that you have \npySerial, pyVisa and NI-VISA installed"
+SERIAL_ERROR_MESSAGE = "Could not connect to COM.\nCheck that your COM # is correct"
+SPEC_ERROR_MESSAGE = "Results are not within specifications."    
     
 """
 Function returns a dictionary of information on a given signal.
@@ -350,12 +352,13 @@ def setup_crystal(ser):
             data_curr = tx_results['Average Data EVM (%)']
             freq_char = CSW_XOSC
        
-    #In the case where a right frequency setting is found, exits the entire script 
+    #In the case where a right frequency setting is not found, exits the entire script 
     if (freq_curr == FREQ_ERROR):
         print (FREQ_ERROR_MESSAGE)
         print ("Turning off output...")
         power_supply.write("OUTP OFF")
         time.sleep(1)
+        print (ERROR_END)
         return FREQ_ERROR
         
     print ("\nYour frequency set value is " + str(freq_char) + " with an average frequency error of " + str(freq_curr)\
@@ -394,6 +397,105 @@ def setup_PS():
     
     
 """
+Method that checks if the results are within specifications
+"""
+def test_spec (CSV):
+    toReturn = 0
+    specs = {}
+    
+    #Initialize specs dictionary
+    with open (INPUT_SPEC, 'rb') as file:
+        #Ignore header
+        file.readline()
+        for line in file:
+            splitLine = line.split()
+            specs[splitLine[0]] = float(splitLine[1])
+        
+    #Comparing results with spec values
+    with open (CSV, 'rb') as results:
+        reader = csv.DictReader(results)
+        for row in reader:
+            if ((float(row ['Average Power (dBm)']) < specs['POWER_LOWER_LIMIT']) or \
+             (float(row ['Average Power (dBm)']) > specs['POWER_UPPER_LIMIT'])):
+                toReturn = SPEC_ERROR
+                print('Average Power (dBm) is ' + str(row ['Average Power (dBm)']))
+                print('Expected Average Power (dBm) is between ' + str(specs['POWER_LOWER_LIMIT'])
+                + " and " + str(specs['POWER_UPPER_LIMIT']))
+                
+            if ((float(row ['Average IQ Offset (dB)']) < specs['IQ_OFFSET_LOWER_LIMIT']) or \
+             (float(row ['Average IQ Offset (dB)']) > specs['IQ_OFFSET_UPPER_LIMIT'])):
+                toReturn = SPEC_ERROR
+                print('Average IQ Offset (dB) is ' + str(row ['Average IQ Offset (dB)']))
+                print('Expected Average IQ Offset (dB) is between ' + str(specs['IQ_OFFSET_LOWER_LIMIT'])
+                + " and " + str(specs['IQ_OFFSET_UPPER_LIMIT']))       
+             
+            if ((float(row ['Average Frequency Error (Hz)']) < specs['FREQ_ERROR_LOWER_LIMIT']) or \
+             (float(row ['Average Frequency Error (Hz)']) > specs['FREQ_ERROR_UPPER_LIMIT'])):
+                toReturn = SPEC_ERROR
+                print('Average Frequency Error (Hz) is ' + str(row ['Average Frequency Error (Hz)']))
+                print('Expected Average Frequency Error (Hz) is between ' + str(specs['FREQ_ERROR_LOWER_LIMIT'])
+                + " and " + str(specs['FREQ_ERROR_UPPER_LIMIT']))  
+
+            if ((float(row ['Average Data EVM (%)']) < specs['DATA_EVM_LOWER_LIMIT']) or \
+             (float(row ['Average Data EVM (%)']) > specs['DATA_EVM_UPPER_LIMIT'])):
+                toReturn = SPEC_ERROR
+                print('Average Data EVM (%) is ' + str(row ['Average Data EVM (%)']))
+                print('Expected Average Data EVM (%) is between ' + str(specs['DATA_EVM_LOWER_LIMIT'])
+                + " and " + str(specs['DATA_EVM_UPPER_LIMIT']))      
+
+            if ((float(row ['Average Peak Data EVM (%)']) < specs['PEAK_DATA_EVM_LOWER_LIMIT']) or \
+             (float(row ['Average Peak Data EVM (%)']) > specs['PEAK_DATA_EVM_UPPER_LIMIT'])):
+                toReturn = SPEC_ERROR
+                print('Average Peak Data EVM (%) is ' + str(row ['Average Peak Data EVM (%)']))
+                print('Expected Average Peak Data EVM (%) is between ' + str(specs['PEAK_DATA_EVM_LOWER_LIMIT'])
+                + " and " + str(specs['PEAK_DATA_EVM_UPPER_LIMIT']))      
+
+            if ((float(row ['Average RS EVM (%)']) < specs['RS_EVM_LOWER_LIMIT']) or \
+             (float(row ['Average RS EVM (%)']) > specs['RS_EVM_UPPER_LIMIT'])):
+                toReturn = SPEC_ERROR
+                print('Average RS EVM (%) is ' + str(row ['Average RS EVM (%)']))
+                print('Expected Average RS EVM (%) is between ' + str(specs['RS_EVM_LOWER_LIMIT'])
+                + " and " + str(specs['RS_EVM_UPPER_LIMIT']))
+
+            if ((float(row ['Average IQ Imbalance Gain (dB)']) < specs['IQ_IMBALANCE_GAIN_LOWER_LIMIT']) or \
+             (float(row ['Average IQ Imbalance Gain (dB)']) > specs['IQ_IMBALANCE_GAIN_UPPER_LIMIT'])):
+                toReturn = SPEC_ERROR
+                print('Average IQ Imbalance Gain (dB) is ' + str(row ['Average IQ Imbalance Gain (dB)']))
+                print('Expected Average IQ Imbalance Gain (dB) is between ' + str(specs['IQ_IMBALANCE_GAIN_LOWER_LIMIT'])
+                + " and " + str(specs['IQ_IMBALANCE_GAIN_UPPER_LIMIT']))     
+
+            if ((float(row ['Average IQ Imbalance Phase (deg)']) < specs['IQ_IMBALANCE_PHASE_LOWER_LIMIT']) or \
+             (float(row ['Average IQ Imbalance Phase (deg)']) > specs['IQ_IMBALANCE_PHASE_UPPER_LIMIT'])):
+                toReturn = SPEC_ERROR
+                print('Average IQ Imbalance Phase (deg) is ' + str(row ['Average IQ Imbalance Phase (deg)']))
+                print('Expected Average IQ Imbalance Phase (deg) is between ' + str(specs['IQ_IMBALANCE_PHASE_LOWER_LIMIT'])
+                + " and " + str(specs['IQ_IMBALANCE_PHASE_UPPER_LIMIT']))       
+
+            if ((float(row ['ACLR E-UTRA Lower (dB)']) < specs['ACLR_EUTRA_L_LOWER_LIMIT']) or \
+             (float(row ['ACLR E-UTRA Lower (dB)']) > specs['ACLR_EUTRA_L_UPPER_LIMIT'])):
+                toReturn = SPEC_ERROR
+                print('ACLR E-UTRA Lower (dB) is ' + str(row ['ACLR E-UTRA Lower (dB)']))
+                print('Expected ACLR E-UTRA Lower (dB) is between ' + str(specs['ACLR_EUTRA_L_LOWER_LIMIT'])
+                + " and " + str(specs['ACLR_EUTRA_L_UPPER_LIMIT']))     
+
+            if ((float(row ['ACLR E-UTRA Upper (dB)']) < specs['ACLR_EUTRA_U_LOWER_LIMIT']) or \
+             (float(row ['ACLR E-UTRA Upper (dB)']) > specs['ACLR_EUTRA_U_UPPER_LIMIT'])):
+                toReturn = SPEC_ERROR
+                print('ACLR E-UTRA Upper (dB) is ' + str(row ['ACLR E-UTRA Upper (dB)']))
+                print('Expected ACLR E-UTRA Upper (dB) is between ' + str(specs['ACLR_EUTRA_U_LOWER_LIMIT'])
+                + " and " + str(specs['ACLR_EUTRA_U_UPPER_LIMIT']))      
+
+            if ((float(row ['Current (A)']) < specs['CURRENT_LOWER_LIMIT']) or \
+             (float(row ['Current (A)']) > specs['CURRENT_UPPER_LIMIT'])):
+                toReturn = SPEC_ERROR
+                print('Current (A) is ' + str(row ['Current (A)']))
+                print('Expected Current (A) is between ' + str(specs['CURRENT_LOWER_LIMIT'])
+                + " and " + str(specs['CURRENT_UPPER_LIMIT']))                
+    return toReturn
+
+
+    
+"""
 Main method performs the following:
 	Set up the DUT board to transmit
 	Sweeping through the array of RB values
@@ -405,7 +507,8 @@ Main method performs the following:
 """
 def main():
 
-        
+    print ("\nRunning miniUT test...\n")
+    
     #Check if the testing environment is properly setup
     #The libraries (can we even test for that?)
     #The PS
@@ -421,6 +524,7 @@ def main():
         print ("Turning off output...")
         power_supply.write("OUTP OFF")
         time.sleep(1)
+        print (ERROR_END)
         return PS_ERROR
         
     #Setting up connection to Litepoint
@@ -432,6 +536,7 @@ def main():
         print ("Turning off output...")
         power_supply.write("OUTP OFF")
         time.sleep(1)
+        print (ERROR_END)
         return CONNECTION_ERROR
         
     #User input to get the rb offset
@@ -449,6 +554,7 @@ def main():
         print ("Turning off output...")
         power_supply.write("OUTP OFF")
         time.sleep(1)
+        print (ERROR_END)
         return SERIAL_ERROR    
         
     if tuple[0] == FREQ_ERROR:
@@ -456,6 +562,7 @@ def main():
         print ("Turning off output...")
         power_supply.write("OUTP OFF")
         time.sleep(1)
+        print (ERROR_END)
         return FREQ_ERROR
 
   
@@ -483,6 +590,9 @@ def main():
             if DEBUG == True:
                 print("DUT response: " + ser.read(BLOCK_READ_SIZE))
        
+            #Necessary delay for the very first reading
+            time.sleep(0.1)
+            
 	        #Second loop to sweep through the gain 
             #TODO : Switch back to user input with xrange if you want more data points
             #for gain in xrange (GAIN_START, GAIN_STOP + 1):
@@ -515,6 +625,7 @@ def main():
                     print ("Turning off output...")
                     power_supply.write("OUTP OFF")
                     time.sleep(1)
+                    print (ERROR_END)
                     return CALC_ERROR
                 
                 #Stop procedure (uncomment to use!)
@@ -537,7 +648,18 @@ def main():
                     wr = csv.DictWriter(result, tx_results.keys())
 			
                     wr.writerow(tx_results)
-               
+                    
+            #Check if the data is in line with the specs
+            spec_result = test_spec(CSV)
+            if (spec_result == SPEC_ERROR):
+                print (SPEC_ERROR_MESSAGE)
+                print ("Turning off output...")
+                power_supply.write(":OUTPUT:STATE OFF")
+                time.sleep(1)
+                print (ERROR_END)
+                return SPEC_ERROR               
+                
+                
             #Trying to reorder the file by setting the columns
             fieldnames = [
     "Gain Value", "Average Power (dBm)",
