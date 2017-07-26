@@ -13,11 +13,13 @@ import time
 session = None
 sessNamePostfix = ''
 RECV_BLOCK_SIZE = 1024
-
+CONNECTION_ERROR = 202
+DEBUG = False
 
 def send(cmd, timeout = 30):
     if len(cmd) > 0:
-        print ('CMD >> ' + str(cmd))
+        if DEBUG == True:
+            print ('CMD >> ' + str(cmd))
         if cmd[-1] != '\n':
             cmd += '\n'
     else:
@@ -34,7 +36,10 @@ def send(cmd, timeout = 30):
                 break
 
         ret = ret.replace(sessNamePostfix, '')
-        print ('RET << ' + str(ret.strip()))
+        if DEBUG == True:
+            print ('RET << ' + str(ret.strip()))
+        else:
+            ret.strip()
         return ret
     else:
         session.send(cmd)
@@ -45,12 +50,19 @@ def send(cmd, timeout = 30):
 def init(host, port):
     global session, sessNamePostfix
     session = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    session.connect((host, port),)
-
-	#Conversion of string into bytes
+    
+    #Possible connection error
+    try:
+        session.connect((host, port),)
+    except:
+       return  CONNECTION_ERROR
+       
     command = '*IDN?; *RST\n'
     session.send(command.encode())
-    print (session.recv(RECV_BLOCK_SIZE))
+    if DEBUG == True:
+        print (session.recv(RECV_BLOCK_SIZE))
+    else:
+        session.recv(RECV_BLOCK_SIZE)
             
     session.send('SESS:NAME?\n')
     ret = session.recv(RECV_BLOCK_SIZE)    
@@ -58,6 +70,7 @@ def init(host, port):
         ret = session.recv(RECV_BLOCK_SIZE)
     sessNamePostfix = ret
 
+    pass
 
 def close():
     session.close()
