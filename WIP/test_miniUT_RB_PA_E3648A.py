@@ -1,10 +1,11 @@
 # -----------------------------------------------------------------------------
-# Name:        test_miniUT_RB_PS_66311B
+# Name:        test_miniUT_RB_PS_E3648A
 # Purpose:     Get the TXQuality data, sweeping the gains for an rb and rb offset
-# Created:     7/25/2017
-# Last Updated: 7/25/2017
+# Created:     7/27/2017
+# Last Updated: 7/27/2017
 #
 # CHANGE SN BEFORE EVERY TEST!!!
+# This program will sweep 5 values: PA_MODE, PA_BIAS, PA_VCC, RB, GAIN
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
 # test_miniUT_crystal_rb configures the Litepoint IQxstream machine to analyze the
 # 782 MHz produced by the board, sweeping the rb values and the gain values. 
@@ -19,34 +20,72 @@
 import socket_interface as scpi
 import datetime
 import time
+import visa
+import serial
 import csv
 import sys
 import os
-import serial
-import visa
 
+#Instrument setup
 HOST = '10.10.14.202'
 PORT = 24000
 COM = 'COM8'
-PS_ADDRESS = 'GPIB0::4::INSTR'
-VSA_FREQ = 782e6
-CABLE_LOSS_DB = 11
+PS_ADDRESS = 'GPIB0::9::INSTR'
 VOLT = 2.5
 CURR_LIMIT = 2
 EVM_LIMIT = 6
+
+#TX Calculations
+VSA_FREQ = 782e6
+CABLE_LOSS_DB = 11
+
+
+#.csv file setup
 CSW = ""
 DUT = "miniUT Rev E8"
 SN = "10"
+
+#Main Looping Logic
+freq_array = ['1f','f','d','c','b','a']
+
+LOW_POWER = '7e'
+HIGH_POWER = '7c'
+power_modes = [LOW_POWER, HIGH_POWER]
+power_dict =    {
+                '7e': 'low power',
+                '7c': 'high power'
+                }
+
+                
+bias_array = ['0','10','20','30', '7f']
+
+PULL_HIGH = '6a2'
+PULL_LOW = '682'
+pull_modes = [PULL_LOW, PULL_HIGH]
+vcc_dict =  {
+            '682682682': 1,
+            '6826826a2': 1.5,
+            '6826a2682': 2,
+            '6826a26a2': 2.5,
+            '6a2682682': 2.5,
+            '6a26826a2': 3,
+            '6a26a2682': 3.5
+}
+ 
+
 INPUT_CSV = 'input_rb_hex.csv'
-GAIN_START = 4
-GAIN_STOP = 70
-BLOCK_READ_SIZE = 1024
 RB = 0
 HEX = 0
-GAIN_TABLE = [0,1,2,3,4,5,10,20,30,40,50,60,70]
-freq_array = ['1f','f','d','c','b','a']
-SUCCESS = 0
-FAIL = 1
+
+GAIN_START = 0
+GAIN_STOP = 70 #TODO CHANGE
+
+#GAIN_TABLE = [0,1,2,3,4,5,10,20,30,40,50,60,70]
+
+INPUT_SPEC = 'input_spec.txt'
+
+BLOCK_READ_SIZE = 1024
+
 
 #Set this value to True if you want more debug statements
 DEBUG = False
@@ -62,6 +101,8 @@ PS_ERROR = 4
 IMPORT_ERROR = 2
 SERIAL_ERROR = 77
 SPEC_ERROR = 99
+SUCCESS = 0
+FAIL = 1
 
 #Error Messages
 ERROR_END = "\n----------------------------------------------------------------\n"
@@ -70,8 +111,9 @@ CALC_ERROR_MESSAGE = "Litepoint Calculations Failed."
 CONNECTION_ERROR_MESSAGE = "Failed to establish connection to Litepoint.\nCheck Host Address."
 PS_ERROR_MESSAGE = "Failed to establish connection to 66311B Power Supply.\nCheck COM and PS Address"
 IMPORT_ERROR_MESSAGE = "Missing Libraries. Check that you have \npySerial, pyVisa and NI-VISA installed"
-SERIAL_ERROR_MESSAGE = "Could not connect to COM.\nCheck that your COM # is correct"
-SPEC_ERROR_MESSAGE = "Results are not within specifications."    
+SERIAL_ERROR_MESSAGE = "Could not connect to COM. \nCheck that your COM # is correct"
+SPEC_ERROR_MESSAGE = "Results are not within specifications."
+    
     
 """
 Function returns a dictionary of information on a given signal.
@@ -83,7 +125,7 @@ params:
 return: 
     Dictionary of information 
 """
-def measure_tx(rb, hex, gain, rb_offset,power_supply): 
+def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply): 
     if (power_supply != 0):
         print ("Performing Analysis for rb " + str(rb) + "\tscaling " + str(hex) + "\tgain " + str(gain) + "\trb offset " + str(rb_offset) + "...\n")
 
@@ -165,6 +207,9 @@ def measure_tx(rb, hex, gain, rb_offset,power_supply):
    
     #Printing the result of the TXQuality test to the command line
     if (DEBUG == True):
+        print ("\nPA Mode: \t\t\t\t" + power_dict[mode])
+        print ("\nPA Bias: \t\t\t\t" + str(bias))
+        print ("\nPA VCC: \t\t\t\t" + vcc_dict[vcc_value])
         print ("\nRB Value: \t\t\t\t" + str(rb))
         print ("\nRB Offset: \t\t\t\t" + str(rb_offset))
         print ("\nHex Value: \t\t\t\t" + str(hex))
@@ -187,8 +232,11 @@ def measure_tx(rb, hex, gain, rb_offset,power_supply):
 
 	
 	#Storing the results to be written to the .csv file
-    #result_dict['nRB Value'] = rb
-    #result_dict['Hex Value'] = hex
+    result_dict['PA Mode'] = power_dict[mode]
+    result_dict['PA Bias'] = str(bias)
+    result_dict['PA VCC'] = vcc_dict[vcc_value]
+    result_dict['nRB Value'] = rb
+    result_dict['Scale'] = '0x' + str(hex)
     result_dict['Gain Value'] = gain
     #result_dict['RB Offset'] = rb_offset
     result_dict['Average IQ Offset (dB)'] = round(float(txq_array[1]),2)
@@ -304,6 +352,8 @@ def setup_DUT():
     if DEBUG == True:
         print("DUT response: " + ser.read(BLOCK_READ_SIZE))
     
+    
+    
 	#Set the PA bias to 9c
     #ser.write("rffe_wrreg f 1 9c\n")
     #print("DUT response: " + ser.read(BLOCK_READ_SIZE))
@@ -316,27 +366,33 @@ def setup_DUT():
 	
     return (ser,CSW)
 	
-
+    
     
 """
     Method that controls the voltage.
     Each parameter is expected to have the value
     PULL_HIGH or PULL_LOW
 """
-def setup_PA_VCC(ctrl_16, ctrl_17, ctrl_18):
+def setup_PA_VCC(ser, ctrl_18, ctrl_17, ctrl_16):
     print ("Controlling output VCC...\n")
     
     #RFFEM_CTRL_18
     ser.write ("memwrite A401B158 " + ctrl_18 + "\n")
-        
+    if DEBUG == True:
+        print("DUT response: " + ser.read(BLOCK_READ_SIZE))        
+
     #RFFEM_CTRL_17
     ser.write ("memwrite A401B13C " + ctrl_17 + "\n")
-       
+    if DEBUG == True:
+        print("DUT response: " + ser.read(BLOCK_READ_SIZE))       
+   
     #RFFEM_CTRL_16
     ser.write ("memwrite A401B138 " + ctrl_16 + "\n")
+    if DEBUG == True:
+        print("DUT response: " + ser.read(BLOCK_READ_SIZE))    
+  
+  
 
-
-    
 """
 Helper method to find CSW to write to 2c0
 param - 
@@ -362,7 +418,7 @@ def setup_crystal(ser):
             print("DUT response: " + ser.read(BLOCK_READ_SIZE))	
         
         #Perform the calculation, want to look at the data evm and freq error
-        tx_results = measure_tx(0,0,0,0,0)
+        tx_results = measure_tx(HIGH_POWER,0,'682682682',0,0,0,0,0)
     
         #Compare the recent calculations to what we have currently
         if (abs (tx_results['Average Frequency Error (Hz)']) < abs(freq_curr) and
@@ -371,13 +427,12 @@ def setup_crystal(ser):
             data_curr = tx_results['Average Data EVM (%)']
             freq_char = CSW_XOSC
        
-    #In the case where a right frequency setting is not found, exits the entire script 
+    #In the case where a right frequency setting is found, exits the entire script 
     if (freq_curr == FREQ_ERROR):
         print (FREQ_ERROR_MESSAGE)
         print ("Turning off output...")
-        power_supply.write("OUTP OFF")
+        power_supply.write(":OUTPUT:STATE OFF")
         time.sleep(1)
-        print (ERROR_END)
         return FREQ_ERROR
         
     print ("\nYour frequency set value is " + str(freq_char) + " with an average frequency error of " + str(freq_curr)\
@@ -397,22 +452,22 @@ def setup_PS():
     except:
         return PS_ERROR
     
+    #Setting output 1
+    #print ("Setting output 1...")
+    power_supply.write(":INSTrument:SELect OUT1")
+    time.sleep(0.1)  
     
     print ("Setting the voltage...\n")
-    power_supply.write("VOLT " + str(VOLT) + "\n")
+    power_supply.write(":APPL %f, %f" % (VOLT, CURR_LIMIT))
     time.sleep(0.1)
-    
-    print ("Setting the current...\n")
-    power_supply.write("CURR " + str(CURR_LIMIT) + "\n")
-    time.sleep(0.1)
+ 
     
     #Turning on output
     print ("Turning on output...")
-    power_supply.write("OUTP ON")
+    power_supply.write(":OUTPUT:STATE ON")
     time.sleep(1)
     
     return power_supply
-    
     
     
 """
@@ -511,9 +566,9 @@ def test_spec (CSV):
                 print('Expected Current (A) is between ' + str(specs['CURRENT_LOWER_LIMIT'])
                 + " and " + str(specs['CURRENT_UPPER_LIMIT']))                
     return toReturn
-
-
-    
+        
+        
+        
 """
 Main method performs the following:
 	Set up the DUT board to transmit
@@ -528,11 +583,10 @@ def main():
 
     print ("\nRunning miniUT test...\n")
     
-    #Check if the testing environment is properly setup
-    #The libraries (can we even test for that?)
-    #The PS
-    #Litepoint
-    #The miniUT
+    #Setting file name
+    CSV = DUT + "_SN_" + str(SN) + ".csv"
+    ORD_CSV = DUT + "_SN_" + str(SN) +  "_ordered.csv"
+    
     
     #Setting up the power supply
     print ("Turning on the power supply...\n")
@@ -541,7 +595,7 @@ def main():
     if power_supply == PS_ERROR:
         print (PS_ERROR_MESSAGE)
         print ("Turning off output...")
-        power_supply.write("OUTP OFF")
+        power_supply.write(":OUTPUT:STATE OFF")
         time.sleep(1)
         print (ERROR_END)
         return PS_ERROR
@@ -553,7 +607,7 @@ def main():
     if scpi == CONNECTION_ERROR:
         print (CONNECTION_ERROR_MESSAGE)
         print ("Turning off output...")
-        power_supply.write("OUTP OFF")
+        power_supply.write(":OUTPUT:STATE OFF")
         time.sleep(1)
         print (ERROR_END)
         return CONNECTION_ERROR
@@ -567,151 +621,178 @@ def main():
     tuple = setup_DUT()
     ser = tuple[0]
     CSW = tuple [1]
-
+    
     if tuple[0] == SERIAL_ERROR:
         print (SERIAL_ERROR_MESSAGE)
         print ("Turning off output...")
-        power_supply.write("OUTP OFF")
+        power_supply.write(":OUTPUT:STATE OFF")
         time.sleep(1)
         print (ERROR_END)
-        return SERIAL_ERROR    
+        return SERIAL_ERROR
         
     if tuple[0] == FREQ_ERROR:
         print (FREQ_ERROR_MESSAGE)
         print ("Turning off output...")
-        power_supply.write("OUTP OFF")
+        power_supply.write(":OUTPUT:STATE OFF")
         time.sleep(1)
         print (ERROR_END)
         return FREQ_ERROR
 
   
-    #Iterates throught the array of RB values, performing
+    #Iterates throught PA_Mode, PA_Bias, PA_VCC, RB, Gain
     #and storing the TX Quality calculations
-    with open (INPUT_CSV, "rb") as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-	#for rb in RB_ARRAY:   
+  
+    #Delete previous .csv file 
+    if os.path.isfile(CSV):
+        os.remove(CSV)  
+        
+    #PA_MODE Loop (#1)
+    for mode in  power_modes:
+        print("Setting PA_Mode...\n")
+        ser.write("rffe_wrreg f 0 " + mode + "\n")        
+        if DEBUG == True:    
+            print("DUT response: " + ser.read(BLOCK_READ_SIZE))  
+    
+    
+        #PA_Bias Loop (#2)
+        for bias in bias_array:
+            print ("Setting PA Bias to " + bias + "...\n")
+            ser.write("rffe_wrreg f 1 " + bias + "\n")
+            if DEBUG == True:    
+                print("DUT response: " + ser.read(BLOCK_READ_SIZE))    
+
+            #PA_VCC Loop (#3)
+            for pull_18 in pull_modes:
+                for pull_17 in pull_modes:
+                    for pull_16 in pull_modes:
+                        if (pull_18 == PULL_HIGH and pull_17 == PULL_HIGH and pull_16 == PULL_HIGH):
+                            continue
+                        print ("Setting the VCC to " + pull_18 + " " + pull_17
+                                + " " + pull_16 + ",where 6a2 is high and 682 is low\n...")
+                        setup_PA_VCC(ser,pull_18,pull_17,pull_16)
+    
+                        vcc_value = pull_18 + pull_17 + pull_16
+                        
+                        with open (INPUT_CSV, "rb") as file:
+                            reader = csv.DictReader(file)
+        
+                            #RB Loop (#4)
+                            for row in reader:
+                            #for rb in RB_ARRAY:   
 		
-            RB = row ['rb']
-            HEX = row['hex']
-            CSV = DUT + "_SN_" + str(SN) + "_rb_" + str(RB) + "_rb_offset_" + str(gain_rb_offset) + ".csv"
-            ORD_CSV = DUT + "_SN_" + str(SN) + "_rb_" + str(RB) + "_rb_offset_" + str(gain_rb_offset) + "ordered.csv"
-
-            if os.path.isfile(CSV):
-                os.remove(CSV)
+                                RB = row ['rb']
+                                HEX = row['hex']
             
 
             
-            #Sending PUSCH signal with inputed RB, gain, scale
-			#Form: d 35 12 0 98ff
-            print("PUSCH command...\n")
-            ser.write("d 35 " + str(RB) + " " + str(gain_rb_offset) + " "+ str(HEX) + "\n")
-            if DEBUG == True:
-                print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-       
-            #Necessary delay for the very first reading
-            time.sleep(0.1)
+                                #Sending PUSCH signal with inputed RB, gain, scale
+                                #Form: d 35 12 0 98ff
+                                print("PUSCH command...\n")
+                                ser.write("d 35 " + str(RB) + " " + str(gain_rb_offset) + " "+ str(HEX) + "\n")
+                                if DEBUG == True:
+                                    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
             
-	        #Second loop to sweep through the gain 
-            #TODO : Switch back to user input with xrange if you want more data points
-            #for gain in xrange (GAIN_START, GAIN_STOP + 1):
-            for gain in GAIN_TABLE:
+                                #Necessary delay for the very first reading
+                                time.sleep(0.1)
+            
+                                #Gain Loop (#5) 
+                                #Switch back to user input with xrange if you want more data points
+                                for gain in xrange (GAIN_START, GAIN_STOP + 1):
+                                #for gain in GAIN_TABLE:
 
-                if (DEBUG == True):
-                    print ("Setting gain...")
+                                    if (DEBUG == True):
+                                        print ("Setting gain...")
 
-                ser.write("d 26 " + str(gain) + "\n")
-
+                                    ser.write("d 26 " + str(gain) + "\n")
                 
-                if (DEBUG == True):
-                    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+                                    if (DEBUG == True):
+                                        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 
-                if (DEBUG == True):
-                    print ("Writing to 242...")
+                                    if (DEBUG == True):
+                                        print ("Writing to 242...")
 
-                ser.write("wr 242 4444\n")
+                                    ser.write("wr 242 4444\n")
 
-                if (DEBUG == True):
-                    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+                                    if (DEBUG == True):
+                                        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
                 
 	
-	            #Measure the avg_power and txquality
-                tx_results = measure_tx(RB, HEX, gain, gain_rb_offset, power_supply)
+                                    #Measure the avg_power and txquality
+                                    tx_results = measure_tx(mode, bias, vcc_value, RB, HEX, gain, gain_rb_offset, power_supply)
                 
-                #Exit early in the case of calculation error
-                if (tx_results == CALC_ERROR):
-                    print (CALC_ERROR_MESSAGE)
-                    print ("Turning off output...")
-                    power_supply.write("OUTP OFF")
-                    time.sleep(1)
-                    print (ERROR_END)
-                    return CALC_ERROR
+                                    #Exit early in the case of calculation error
+                                    if (tx_results == CALC_ERROR):
+                                        print (CALC_ERROR_MESSAGE)
+                                        print ("Turning off output...")
+                                        power_supply.write(":OUTPUT:STATE OFF")
+                                        time.sleep(1)
+                                        print (ERROR_END)
+                                        return CALC_ERROR
                 
-                #Stop procedure (uncomment to use!)
-                #Close socket connection to enable GUI access
-                #Ask for raw_input to temporarily pause execution
-                if (STEP_TEST == True):
-                    scpi.close()    
-                    raw_input("\n\n\tPress a key to Continue\t\n\n")
-                    scpi = setup_connection()
+                                    #Stop procedure (uncomment to use!)
+                                    #Close socket connection to enable GUI access
+                                    #Ask for raw_input to temporarily pause execution
+                                    if (STEP_TEST == True):
+                                        scpi.close()    
+                                        raw_input("\n\n\tPress a key to Continue\t\n\n")
+                                        scpi = setup_connection()
 		
-                #Writes header if there is none
-                if not os.path.isfile(CSV):               
-                    with open (CSV,'ab') as result:
-                        wr = csv.DictWriter(result, tx_results.keys())
-                        wr.writeheader()
+                                    #Writes header if there is none
+                                    if not os.path.isfile(CSV):               
+                                        with open (CSV,'ab') as result:
+                                            wr = csv.DictWriter(result, tx_results.keys())
+                                            wr.writeheader()
                        
 		
-                #Writing the rest of the non-header data to the file
-                with open (CSV,'ab') as result:
-                    wr = csv.DictWriter(result, tx_results.keys())
+                                    #Writing the rest of the non-header data to the file
+                                    with open (CSV,'ab') as result:
+                                        wr = csv.DictWriter(result, tx_results.keys())
 			
-                    wr.writerow(tx_results)
-                    
-            #Check if the data is in line with the specs
-            spec_result = test_spec(CSV)
-            if (spec_result == SPEC_ERROR):
-                print (SPEC_ERROR_MESSAGE)
-                print ("Turning off output...")
-                power_supply.write(":OUTPUT:STATE OFF")
-                time.sleep(1)
-                print (ERROR_END)
-                return SPEC_ERROR               
+                                        wr.writerow(tx_results)
+              
+    #Check if the data is in line with the specs
+    spec_result = test_spec(CSV)
+    if (spec_result == SPEC_ERROR):
+        print (SPEC_ERROR_MESSAGE)
+        print ("Turning off output...")
+        power_supply.write(":OUTPUT:STATE OFF")
+        time.sleep(1)
+        print (ERROR_END)
+        return SPEC_ERROR
                 
-                
-            #Trying to reorder the file by setting the columns
-            fieldnames = [
-    "Gain Value", "Average Power (dBm)",
+    #Trying to reorder the file by setting the columns
+    fieldnames = [
+    "PA Mode", "PA Bias", "PA VCC","nRB Value", "Scale","Gain Value", "Average Power (dBm)",
     "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
     "Average Data EVM (%)", "Average Peak Data EVM (%)",
     "Average RS EVM (%)","Average Peak RS EVM (%)",
     "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
     "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Current (A)"]
 
-            with open(CSV,'rb') as original, open (ORD_CSV, 'ab') as ordered:
-                wr = csv.DictWriter(ordered, fieldnames = fieldnames)
-                    #Write starting data to the file
-                file = open(ORD_CSV, 'wb')
-                file.write("Date & Time of Test:\t" + datetime.datetime.strftime(datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S') + "\n") 
-                file.write ("DUT:\t\t\t\t\t"+ DUT + "\n")
-                file.write("SN:\t\t\t\t\t\t" + SN + "\n")
-                file.write ("CSW(2c0):\t\t\t\t" + str(CSW) + "28\n")
-                file.write ("RB:\t\t\t\t\t\t" + str(RB)+ "\n")
-                file.write("Scale:\t\t\t\t\t0x" + str(HEX) + "\n")
-                file.write ("RB Offset:\t\t\t\t" + str(gain_rb_offset) + "\n")
-                file.write("VSS_2V0_3V3:\t\t\t" + str(VOLT) + "V\n")
-                #file.write("\n")
-                file.close()
-                wr.writeheader()
-                for row in csv.DictReader(original):
-                    wr.writerow(row)
+    with open(CSV,'rb') as original, open (ORD_CSV, 'ab') as ordered:
+        wr = csv.DictWriter(ordered, fieldnames = fieldnames)
+        #Write starting data to the file
+        file = open(ORD_CSV, 'wb')
+        file.write("Date & Time of Test:\t" + datetime.datetime.strftime(datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S') + "\n") 
+        file.write ("DUT:\t\t\t\t\t"+ DUT + "\n")
+        file.write("SN:\t\t\t\t\t\t" + SN + "\n")
+        file.write ("CSW(2c0):\t\t\t\t" + str(CSW) + "28\n")
+        #file.write ("RB:\t\t\t\t\t\t" + str(RB)+ "\n")
+        #file.write("Scale:\t\t\t\t\t0x" + str(HEX) + "\n")
+        file.write ("RB Offset:\t\t\t\t" + str(gain_rb_offset) + "\n")
+        file.write("VSS_2V0_3V3:\t\t\t" + str(VOLT) + "V\n")
+        #file.write("\n")
+        file.close()
+        wr.writeheader()
+        for row in csv.DictReader(original):
+            wr.writerow(row)
 
-            #TODO Remove the unsorted file, and rename the ordered file to the original.
-            os.remove(CSV)
-            os.rename(ORD_CSV,CSV)
+    #TODO Remove the unsorted file, and rename the ordered file to the original.
+    os.remove(CSV)
+    os.rename(ORD_CSV,CSV)
             
     #Turn off the output
-    power_supply.write("OUTP OFF")
+    power_supply.write(":OUTPUT:STATE OFF")
     time.sleep(0.1)
 	
     #Trying to reorder the file, by setting the columns
