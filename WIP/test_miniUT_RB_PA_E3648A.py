@@ -97,7 +97,7 @@ DEBUG = False
 STEP_TEST = False
 
 #Set this value to True if you want to log the output to console
-LOGGING = True
+LOGGING = False
 
 LOG_FILE = "test_miniUT_RB_PA_E3648A_log.log"
 
@@ -275,6 +275,8 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
         
         #Attempt to redo the test up to MAX_RETESTS number of times
         if (NUM_OF_RETEST < MAX_RETESTS):
+            scpi.close()
+            scpi = setup_connection()
             NUM_OF_RETEST += 1
             print "\nRetest number " + str(NUM_OF_RETEST + 1) + "...\n"
             return measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply)
