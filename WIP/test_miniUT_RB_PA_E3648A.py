@@ -1,8 +1,9 @@
 # -----------------------------------------------------------------------------
-# Name:        test_miniUT_RB_PS_E3648A
-# Purpose:     Get the TXQuality data, sweeping the gains for an rb and rb offset
+# Name:        test_miniUT_RB_PA_E3648A
+# Purpose:     Get the TXQuality data, sweeping the PA mode, PA bias, PA vcc,
+#              RB, and the Gain.
 # Created:     7/27/2017
-# Last Updated: 7/27/2017
+# Last Updated: 7/31/2017
 #
 # CHANGE SN BEFORE EVERY TEST!!!
 # This program will sweep 5 values: PA_MODE, PA_BIAS, PA_VCC, RB, GAIN
@@ -45,12 +46,13 @@ CSW = ""
 DUT = "miniUT Rev E8"
 SN = "10"
 
-#Main Looping Logic
+#Main Looping Logic Variables (in order of appearance)
 freq_array = ['1f','f','d','c','b','a']
 
 LOW_POWER = '7e'
 HIGH_POWER = '7c'
 power_modes = [LOW_POWER, HIGH_POWER]
+#power_modes = [LOW_POWER]
 power_dict =    {
                 '7e': 'low power',
                 '7c': 'high power'
@@ -62,6 +64,7 @@ bias_array = ['0','10','20','30', '7f']
 PULL_HIGH = '6a2'
 PULL_LOW = '682'
 pull_modes = [PULL_LOW, PULL_HIGH]
+#pull_modes = [PULL_LOW]
 vcc_dict =  {
             '682682682': 1,
             '6826826a2': 1.5,
@@ -93,6 +96,11 @@ DEBUG = False
 #Set this value to True if you want to do step by step testing
 STEP_TEST = False
 
+#Set this value to True if you want to log the output to console
+LOGGING = True
+
+LOG_FILE = "test_miniUT_RB_PA_E3648A_log.log"
+
 #Error Values
 FREQ_ERROR = 100000
 CALC_ERROR = -200
@@ -103,6 +111,8 @@ SERIAL_ERROR = 77
 SPEC_ERROR = 99
 SUCCESS = 0
 FAIL = 1
+NUM_OF_RETEST = 0
+MAX_RETESTS = 5
 
 #Error Messages
 ERROR_END = "\n----------------------------------------------------------------\n"
@@ -127,7 +137,10 @@ return:
 """
 def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply): 
     if (power_supply != 0):
-        print ("Performing Analysis for rb " + str(rb) + "\tscaling " + str(hex) + "\tgain " + str(gain) + "\trb offset " + str(rb_offset) + "...\n")
+        print ("Performing Analysis for PA mode " + power_dict[mode] + 
+               ", PA bias " + str(bias) + ", PA VCC " + str(vcc_dict[vcc_value]) +
+               ", rb " + str(rb)+ ", scaling " + str(hex) +
+               ", gain " + str(gain) + ", rb offset " + str(rb_offset) + "...\n")
 
 
     #Settings setup (taken from the SCPI Console)
@@ -256,6 +269,15 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
     
     #In the case of calculation failure
     if (power_supply != 0 and (int(power_arr[0]) != 0 or int(txq_array[0]) != 0 or int(aclr_array[0]) != 0)):
+        print "Power calculation error code:\t" + power_arr[0]
+        print "TXQ calculation error code:\t" + txq_array[0]
+        print "SPEC calculation error code:\t" + aclr_array[0]
+        
+        #Attempt to redo the test up to MAX_RETESTS number of times
+        if (NUM_OF_RETEST < MAX_RETESTS):
+            NUM_OF_RETEST += 1
+            print "\nRetest number " + str(NUM_OF_RETEST + 1) + "...\n"
+            return measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply)
         return CALC_ERROR
         
     return result_dict
@@ -582,7 +604,12 @@ Main method performs the following:
 def main():
 
     print ("\nRunning miniUT test...\n")
-    
+
+    #Enable Logging if set
+    if LOGGING == True:
+        sys.stdout = Logger()
+        
+        
     #Setting file name
     CSV = DUT + "_SN_" + str(SN) + ".csv"
     ORD_CSV = DUT + "_SN_" + str(SN) +  "_ordered.csv"
@@ -750,15 +777,6 @@ def main():
 			
                                         wr.writerow(tx_results)
               
-    #Check if the data is in line with the specs
-    spec_result = test_spec(CSV)
-    if (spec_result == SPEC_ERROR):
-        print (SPEC_ERROR_MESSAGE)
-        print ("Turning off output...")
-        power_supply.write(":OUTPUT:STATE OFF")
-        time.sleep(1)
-        print (ERROR_END)
-        return SPEC_ERROR
                 
     #Trying to reorder the file by setting the columns
     fieldnames = [
@@ -795,6 +813,16 @@ def main():
     power_supply.write(":OUTPUT:STATE OFF")
     time.sleep(0.1)
 	
+    #Check if the data is in line with the specs
+    spec_result = test_spec(CSV)
+    if (spec_result == SPEC_ERROR):
+        print (SPEC_ERROR_MESSAGE)
+        print ("Turning off output...")
+        power_supply.write(":OUTPUT:STATE OFF")
+        time.sleep(1)
+        print (ERROR_END)
+        return SPEC_ERROR
+        
     #Trying to reorder the file, by setting the columns
     """
     fieldnames = [
@@ -839,7 +867,21 @@ def main():
     return SUCCESS
 
 
+    
+""" 
+    Class used to log output to stdout and a logfile
+"""
+class Logger(object):
+    def __init__(self):
+        self.terminal = sys.stdout
+        self.log = open(LOG_FILE, "a")
 
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)  
+        
+        
+        
 """
     Automatic execution of main method on run of the script
 """

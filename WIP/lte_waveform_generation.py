@@ -40,7 +40,7 @@ def main():
     scpi.send('CONFigure:WAVE:PDCCh:DCISetup2:HARQ:ARRay (0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7);')
 
     # Radio Network Temporary Identifier
-    scpi.send('CONFigure:WAVE:RNTI 14;')
+    scpi.send('CONFigure:WAVE:RNTI 65535;')
 
     # Cell ID
     scpi.send('CONFigure:WAVE:CID 0;')
