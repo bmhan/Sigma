@@ -3,7 +3,7 @@
 # Purpose:     Get the TXQuality data, sweeping the PA mode, PA bias, PA vcc,
 #              RB, and the Gain.
 # Created:     7/27/2017
-# Last Updated: 7/31/2017
+# Last Updated: 8/1/2017
 #
 # CHANGE SN BEFORE EVERY TEST!!!
 # This program will sweep 5 values: PA_MODE, PA_BIAS, PA_VCC, RB, GAIN
@@ -51,8 +51,8 @@ freq_array = ['1f','f','d','c','b','a']
 
 LOW_POWER = '7e'
 HIGH_POWER = '7c'
-power_modes = [LOW_POWER, HIGH_POWER]
-#power_modes = [LOW_POWER]
+#power_modes = [LOW_POWER, HIGH_POWER]
+power_modes = [HIGH_POWER]
 power_dict =    {
                 '7e': 'low power',
                 '7c': 'high power'
@@ -60,6 +60,8 @@ power_dict =    {
 
                 
 bias_array = ['0','10','20','30', '7f']
+#bias_array = ['30','7f']
+
 
 PULL_HIGH = '6a2'
 PULL_LOW = '682'
@@ -184,9 +186,11 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
     power_arr = scpi.send('FETC:POW:AVER?').replace(';', '').split(',')
     result_dict['Average Power (dBm)'] = round(round(float(power_arr[1]),2),2) + CABLE_LOSS_DB  
 	
-    
+   
 	#Calculating and fetching TXQuality
     scpi.send('CALC:TXQ 0,10')
+    #Incremental delay for relatively long command
+    time.sleep(0.01)
     ret3 = scpi.send('*WAI; SYST:ERR:ALL?')
     if (DEBUG == True):
         print ("TXQuality status: " + ret3)
@@ -195,6 +199,7 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
 	
     #Calculating Spectrum and fetching E-UTRA Lower and Upper
     scpi.send('CALC:SPEC 0,20')
+    
     ret4 = scpi.send('*WAI; SYST:ERR:ALL?')
     if (DEBUG == True):
         print ("ACLR status: " + ret4)
@@ -208,12 +213,12 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
     if power_supply != 0: 
         #Measure the voltage
         power_supply.write(":MEAS:VOLT? ")
-        time.sleep(0.1)
+        time.sleep(0.01)
         voltage = float(power_supply.read())
     
         #Measure the current
         power_supply.write(":MEAS:CURR? ")
-        time.sleep(0.1)
+        time.sleep(0.01)
         current = float(power_supply.read())
     else:
         current = 0
@@ -269,6 +274,9 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
     #result_dict['Date & Time'] =  datetime.datetime.strftime(
     #datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S')  
     
+    global NUM_OF_RETEST
+    global MAX_RETESTS
+    
     #In the case of calculation failure
     if (power_supply != 0 and (int(power_arr[0]) != 0 or int(txq_array[0]) != 0 or int(aclr_array[0]) != 0)):
         print "Power calculation error code:\t" + power_arr[0]
@@ -276,16 +284,15 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
         print "SPEC calculation error code:\t" + aclr_array[0]
         
         #Attempt to redo the test up to MAX_RETESTS number of times
-        global NUM_OF_RETEST
-        global MAX_RETESTS
         if (NUM_OF_RETEST < MAX_RETESTS):
             scpi.close()
             setup_connection()
             NUM_OF_RETEST += 1
-            print "\nRetest number " + str(NUM_OF_RETEST + 1) + "...\n"
+            print "\nRetest number " + str(NUM_OF_RETEST) + "...\n"
             return measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply)
         return CALC_ERROR
-        
+    
+    NUM_OF_RETEST = 0
     return result_dict
     
 	
@@ -515,6 +522,9 @@ def test_spec (CSV):
         
     #Comparing results with spec values
     with open (CSV, 'rb') as results:
+        for line in results:
+            if 'VSS' in line:
+                break
         reader = csv.DictReader(results)
         for row in reader:
             if ((float(row ['Average Power (dBm)']) < specs['POWER_LOWER_LIMIT']) or \
@@ -608,7 +618,7 @@ Main method performs the following:
 	files
 """
 def main():
-
+    
     print ("\nRunning miniUT test...\n")
 
     #Enable Logging if set
@@ -819,6 +829,7 @@ def main():
     power_supply.write(":OUTPUT:STATE OFF")
     time.sleep(0.1)
 	
+    
     #Check if the data is in line with the specs
     spec_result = test_spec(CSV)
     if (spec_result == SPEC_ERROR):
