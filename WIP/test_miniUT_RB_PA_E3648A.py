@@ -97,7 +97,7 @@ DEBUG = False
 STEP_TEST = False
 
 #Set this value to True if you want to log the output to console
-LOGGING = False
+LOGGING = True
 
 LOG_FILE = "test_miniUT_RB_PA_E3648A_log.log"
 
@@ -140,7 +140,7 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
         print ("Performing Analysis for PA mode " + power_dict[mode] + 
                ", PA bias " + str(bias) + ", PA VCC " + str(vcc_dict[vcc_value]) +
                ", rb " + str(rb)+ ", scaling " + str(hex) +
-               ", gain " + str(gain) + ", rb offset " + str(rb_offset) + "...\n")
+               ", gain " + str(gain) + ", rb offset " + str(rb_offset) + "...")
 
 
     #Settings setup (taken from the SCPI Console)
@@ -153,6 +153,7 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
 	#VSA1 ; RLEVel:AUTO
 	#CHAN1;LTE;CONF:EARF:DL 5180
 	
+
     scpi.send ('CHAN1;LTE;CONF:RBC AUTO')
     scpi.send('CHAN1;LTE;CONF:BAND 13')
     scpi.send('CHAN1;LTE;CONF:EARF:UL:cc1 23180')
@@ -228,7 +229,6 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
         print ("\nHex Value: \t\t\t\t" + str(hex))
         print ("\nGain Value: \t\t\t\t" + str(gain))
         print ("\nStatus Code: \t\t\t\t" + str(float(txq_array[0])))
-        print ("\nAverage Power (dBm): \t\t\t" + str(float(result_dict['Average Power (dBm)'])))
         print ("Average_IQ_Offset (dB): \t\t" + str(float(txq_array[1])))
         print ("Average_Frequency_Error (Hz): \t\t" + str(float(txq_array[2])))
         print ("Average_Data_EVM (%): \t\t\t" + str(float(txq_array[3])))
@@ -242,7 +242,9 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
         print ("Voltage (V): \t\t\t\t" + str(voltage))
         print ("Current (A): \t\t\t\t" + str(current))
         
-
+    #Prints the result of the Power calculation to the command line
+    if (power_supply != 0):
+        print ("Average Power (dBm): \t\t\t" + str(float(result_dict['Average Power (dBm)'])) + '\n\n')
 	
 	#Storing the results to be written to the .csv file
     result_dict['PA Mode'] = power_dict[mode]
@@ -274,9 +276,11 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
         print "SPEC calculation error code:\t" + aclr_array[0]
         
         #Attempt to redo the test up to MAX_RETESTS number of times
+        global NUM_OF_RETEST
+        global MAX_RETESTS
         if (NUM_OF_RETEST < MAX_RETESTS):
             scpi.close()
-            scpi = setup_connection()
+            setup_connection()
             NUM_OF_RETEST += 1
             print "\nRetest number " + str(NUM_OF_RETEST + 1) + "...\n"
             return measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply)
@@ -340,7 +344,7 @@ def setup_connection ():
     # assuming immediate trigger at the moment
     scpi.send('VSA; TRIG:SOUR IMM; SRAT 37.5e6; CAPT:TIME 20ms')	
     
-    return scpi
+    return is_connected
 
 
 
@@ -631,9 +635,9 @@ def main():
         
     #Setting up connection to Litepoint
     #this is a simple conceptual calibration procedure
-    scpi = setup_connection()
+    connection_result = setup_connection()
     
-    if scpi == CONNECTION_ERROR:
+    if connection_result == CONNECTION_ERROR:
         print (CONNECTION_ERROR_MESSAGE)
         print ("Turning off output...")
         power_supply.write(":OUTPUT:STATE OFF")
@@ -764,7 +768,7 @@ def main():
                                     if (STEP_TEST == True):
                                         scpi.close()    
                                         raw_input("\n\n\tPress a key to Continue\t\n\n")
-                                        scpi = setup_connection()
+                                        setup_connection()
 		
                                     #Writes header if there is none
                                     if not os.path.isfile(CSV):               
