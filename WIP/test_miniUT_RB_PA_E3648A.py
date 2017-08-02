@@ -8,12 +8,11 @@
 # CHANGE SN BEFORE EVERY TEST!!!
 # This program will sweep 5 values: PA_MODE, PA_BIAS, PA_VCC, RB, GAIN
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
-# test_miniUT_crystal_rb configures the Litepoint IQxstream machine to analyze the
+# The program configures the Litepoint IQxstream machine to analyze the
 # 782 MHz produced by the board, sweeping the rb values and the gain values. 
 # The program begins by calibrating the CSW 
 # The program begins by prompting the user for a range of gain values to test.
-# The result of the test is printed to terminal, and is stored in two .csv files -
-# a sorted and unsorted .csv file
+# The result of the test is printed to terminal, and is stored in a .csv file.
 # The program uses the socket_interface.py to initialize
 # a connection to the board and send and receive data from IQxstream. The serial
 # library is used to communicate to the board for testing.
@@ -60,13 +59,13 @@ power_dict =    {
 
                 
 bias_array = ['0','10','20','30', '7f']
-#bias_array = ['30','7f']
+#bias_array = ['0']
 
 
 PULL_HIGH = '6a2'
 PULL_LOW = '682'
 pull_modes = [PULL_LOW, PULL_HIGH]
-#pull_modes = [PULL_LOW]
+#pull_modes = [PULL_HIGH]
 vcc_dict =  {
             '682682682': 1,
             '6826826a2': 1.5,
@@ -130,12 +129,16 @@ SPEC_ERROR_MESSAGE = "Results are not within specifications."
 """
 Function returns a dictionary of information on a given signal.
 params:
+    mode - The PA mode
+    bias - The PA bias
+    vc - the PA VCC in Volts
     rb - The RB value
     hex - The scale
+    gain - The gain
     rb_offset - The start rb offset
     power_supply - The power supply
 return: 
-    Dictionary of information 
+    Dictionary of information or CALC_ERROR if the calculations were not mades
 """
 def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply): 
     if (power_supply != 0):
@@ -254,7 +257,7 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
 	#Storing the results to be written to the .csv file
     result_dict['PA Mode'] = power_dict[mode]
     result_dict['PA Bias'] = str(bias)
-    result_dict['PA VCC'] = vcc_dict[vcc_value]
+    result_dict['PA VCC (V)'] = vcc_dict[vcc_value]
     result_dict['nRB Value'] = rb
     result_dict['Scale'] = '0x' + str(hex)
     result_dict['Gain Value'] = gain
@@ -301,7 +304,7 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
 """
 Function plays a .iqvsg file as the VSG
 param:
-    waveform_file - The nameof the waveform file to play
+    waveform_file - The name of the waveform file to play
 """
 def play_waveform(waveform_file):
     # enable port RF1A with VSG
@@ -331,6 +334,8 @@ def setup_vsg(frequency, power):
 
 """
 Function sets up socket connection to the IQxstream
+return - A passing value or CONNECTION_ERROR if the connection to the 
+         Litepoint machine could not be established.
 """
 def setup_connection ():
     is_connected = scpi.init(HOST, PORT)
@@ -357,6 +362,12 @@ def setup_connection ():
 
 """
 Function sets up the DUT to transmit the signal
+return - A tuple containing two values:
+            1) The serial object
+            2) The CSW to optimize the crystal
+         or a tuple of FREQ_ERROR or SERIAL_ERROR if
+         the crystal could not be optimized or a serial
+         connection could not be established respectively
 """
 def setup_DUT():
 
@@ -432,7 +443,8 @@ def setup_PA_VCC(ser, ctrl_18, ctrl_17, ctrl_16):
 Helper method to find CSW to write to 2c0
 param - 
     ser - The serial socket connection
-return - The CSW value to calibrate the crystal
+return - The CSW value to calibrate the crystal or
+         FREQ_ERROR if a CSW value could not be found
 """
 def setup_crystal(ser):
     freq_curr = FREQ_ERROR
@@ -478,6 +490,8 @@ def setup_crystal(ser):
         
 """
 Method that sets up the power supply, 66311B
+return - A power_supply object, or PS_ERROR if a connection to the
+         power supply could not be established
 """
 def setup_PS():
     #Setting up the Power Supply
@@ -507,6 +521,7 @@ def setup_PS():
     
 """
 Method that checks if the results are within specifications
+return - 0 if the specs are within range, SPEC_ERROR otherwise
 """
 def test_spec (CSV):
     toReturn = 0
@@ -616,6 +631,8 @@ Main method performs the following:
 	signal.
 	Returns the information through the terminal and two .csv
 	files
+return - 0 if the test was successful, error values otherwise that 
+         vary depending on what the error was
 """
 def main():
     
@@ -734,10 +751,17 @@ def main():
                                 ser.write("d 35 " + str(RB) + " " + str(gain_rb_offset) + " "+ str(HEX) + "\n")
                                 if DEBUG == True:
                                     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+                                else:
+                                    ser.read()
             
-                                #Necessary delay for the very first reading
-                                time.sleep(0.1)
-            
+                                #Command to allow delay
+                                ser.write ("rd 2c0\n")
+                                if DEBUG == True:
+                                    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+                                else:
+                                    ser.read()
+                                time.sleep(1)
+                                
                                 #Gain Loop (#5) 
                                 #Switch back to user input with xrange if you want more data points
                                 for gain in xrange (GAIN_START, GAIN_STOP + 1):
@@ -745,21 +769,26 @@ def main():
 
                                     if (DEBUG == True):
                                         print ("Setting gain...")
-
+                                    else:
+                                        ser.read()
                                     ser.write("d 26 " + str(gain) + "\n")
                 
                                     if (DEBUG == True):
                                         print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-
+                                    else:
+                                        ser.read()
                                     if (DEBUG == True):
                                         print ("Writing to 242...")
-
+                                    else:
+                                        ser.read()
                                     ser.write("wr 242 4444\n")
 
                                     if (DEBUG == True):
                                         print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-                
-	
+                                    else:
+                                        ser.read()
+                                    
+                                    
                                     #Measure the avg_power and txquality
                                     tx_results = measure_tx(mode, bias, vcc_value, RB, HEX, gain, gain_rb_offset, power_supply)
                 
@@ -796,7 +825,7 @@ def main():
                 
     #Trying to reorder the file by setting the columns
     fieldnames = [
-    "PA Mode", "PA Bias", "PA VCC","nRB Value", "Scale","Gain Value", "Average Power (dBm)",
+    "PA Mode", "PA Bias", "PA VCC (V)","nRB Value", "Scale","Gain Value", "Average Power (dBm)",
     "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
     "Average Data EVM (%)", "Average Peak Data EVM (%)",
     "Average RS EVM (%)","Average Peak RS EVM (%)",
@@ -821,7 +850,7 @@ def main():
         for row in csv.DictReader(original):
             wr.writerow(row)
 
-    #TODO Remove the unsorted file, and rename the ordered file to the original.
+    #Remove the unsorted file, and rename the ordered file to the original.
     os.remove(CSV)
     os.rename(ORD_CSV,CSV)
             
@@ -840,47 +869,6 @@ def main():
         print (ERROR_END)
         return SPEC_ERROR
         
-    #Trying to reorder the file, by setting the columns
-    """
-    fieldnames = [
-    "Date & Time","nRB Value", "RB Offset", "Hex Value", "Gain Value", "Average Power (dBm)",
-    "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
-    "Average Data EVM (%)", "Average Peak Data EVM (%)",
-    "Average RS EVM (%)","Average Peak RS EVM (%)",
-    "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
-    "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Voltage (V)", "Current (A)"]
-    """
-    """
-    fieldnames = [
-    "Gain Value", "Average Power (dBm)",
-    "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
-    "Average Data EVM (%)", "Average Peak Data EVM (%)",
-    "Average RS EVM (%)","Average Peak RS EVM (%)",
-    "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
-    "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Current (A)"]
-
-    with open(CSV,'rb') as original, open (ORD_CSV, 'ab') as ordered:
-        wr = csv.DictWriter(ordered, fieldnames = fieldnames)
-        #Write starting data to the file
-        file = open(ORD_CSV, 'wb')
-        file.write("Date & Time of Test:\t" + datetime.datetime.strftime(datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S') + "\n") 
-        file.write ("DUT:\t\t\t\t\t"+ DUT + "\n")
-        file.write("SN:\t\t\t\t\t\t" + SN + "\n")
-        file.write ("CSW(2c0):\t\t\t\t" + str(CSW) + "28\n")
-        file.write ("RB:\t\t\t\t\t\t" + str(RB)+ "\n")
-        file.write("Scale:\t\t\t\t\t0x" + str(HEX) + "\n")
-        file.write ("RB Offset:\t\t\t\t" + str(gain_rb_offset) + "\n")
-        file.write("VSS_2V0_3V3:\t\t\t" + str(VOLT) + "V\n")
-        #file.write("\n")
-        file.close()
-        wr.writeheader()
-        for row in csv.DictReader(original):
-            wr.writerow(row)
-        
-    #TODO Remove the unsorted file, and rename the ordered file to the original.
-    os.remove(CSV)
-    os.rename(ORD_CSV,CSV)
-    """
     return SUCCESS
 
 
