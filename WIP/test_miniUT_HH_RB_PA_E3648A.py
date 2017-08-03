@@ -3,7 +3,7 @@
 # Purpose:     Get the TXQuality data, sweeping the PA mode, PA bias, PA vcc,
 #              RB, and the Gain.
 # Created:     7/27/2017
-# Last Updated: 8/2/2017
+# Last Updated: 8/1/2017
 #
 # CHANGE SN BEFORE EVERY TEST!!!
 # This program will sweep 5 values: PA_MODE, PA_BIAS, PA_VCC, RB, GAIN
@@ -25,14 +25,21 @@ import serial
 import csv
 import sys
 import os
-import ftd2xx as ft
+
+#Order of the .csv columns
+fieldnames = [
+"PA Mode", "PA Bias", "PA VCC (V)","nRB Value", "Scale","Gain Value", "Average Power (dBm)",
+"Average IQ Offset (dB)", "Average Frequency Error (Hz)",
+"Average Data EVM (%)", "Average Peak Data EVM (%)",
+"Average RS EVM (%)","Average Peak RS EVM (%)",
+"Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
+"ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Current (A)"]
 
 #Instrument setup
 HOST = '10.10.14.202'
 PORT = 24000
 COM = 'COM8'
 PS_ADDRESS = 'GPIB0::9::INSTR'
-MM_ADDRESS = 'GPIB0::1::INSTR'
 VOLT = 2.5
 CURR_LIMIT = 2
 EVM_LIMIT = 6
@@ -48,11 +55,6 @@ DUT = "miniUT Rev E8"
 SN = "10"
 
 #Main Looping Logic Variables (in order of appearance)
-ON = True
-OFF = False
-RELAY_1 = 0x01
-
-
 freq_array = ['1f','f','d','c','b','a']
 
 LOW_POWER = '7e'
@@ -93,7 +95,7 @@ GAIN_STOP = 70 #TODO CHANGE
 #GAIN_TABLE = [0,1,2,3,4,5,10,20,30,40,50,60,70]
 
 INPUT_SPEC = 'input_spec.txt'
-
+HAS_HEADER = False
 BLOCK_READ_SIZE = 1024
 
 
@@ -632,77 +634,6 @@ def test_spec (CSV):
         
         
 """
-    Method that checks for current leakage
-    by using the 8845A multimeter
-    We will be initalizing a multimeter and a relay connection
-    return - The current draw from the board when it is in
-             low power mode
-"""
-def check_current_leakage(power_supply) :
-    #Credit goes to the Amazon guy
-    #Function defined here to turn on and off the relay
-    
-    power_supply.write(":MEAS:CURR? ")
-    time.sleep(0.1)
-    low_curr = float(power_supply.read())
-    print("My current from the power supply is: " + str(low_curr))
-    if (low_curr < 0.35):
-        
-        #Establish connection to the relay
-        try:
-            my_relay = ft.open(0) # Opens the device, if it's connected
-        except:
-            print "Couldn't be opened!"
-        
-        #Enables Bit Bang Mode
-        my_relay.setBitMode(0xFF,0x01)
-        
-        def setRelay (relay,state):
-            # Get the current state of the relays
-            relayStates = my_relay.getBitMode() 
-            if state == ON:
-                # Turn on relay(s) (without messing with the others)
-                my_relay.write( chr(relayStates | relay) ) 
-            # The .write() method requires a CHARACTER, so we
-            # type-cast our selected state INT to a chr()
-            elif state == OFF:
-                # Turn off relay(s) (again without killing the others)
-                my_relay.write( chr(relayStates & ~relay) )
-        
-        
-        #Turn the relay on for the low power mode
-        print "\nTurning on the relay..."
-        setRelay (RELAY_1, ON)
-        time.sleep(1)
-        
-        #Establish connection to the multimeter, Fluke 8845A
-        rm = visa.ResourceManager()
-        multimeter = rm.open_resource(MM_ADDRESS)
-
-        #Setup and measure the current 
-        print "\nSetting range to be 1A..."
-        multimeter.write("CURR:RANG 1")
-        time.sleep(1)
-        multimeter.write("CURR:RANG?")
-        time.sleep(1)
-        print("Current range is: " + multimeter.read())         
-        print ("Measuring current...")
-        multimeter.write("MEAS:CURR:DC?")
-        time.sleep(1)
-        low_curr = float(multimeter.read())
-        
-        print ("The current drawn from the multimeter is: " + str(low_curr))
-        
-        #Turn the relay off now that test is done
-        #setRelay (RELAY_1, OFF)
-        #time.sleep(1)
-        
-        #ft.close(0)
-    else:
-        print ("Current was too high; current_leakage test could not be done")
-        
-        
-"""    
 Main method performs the following:
 	Set up the DUT board to transmit
 	Sweeping through the array of RB values
@@ -731,9 +662,7 @@ def main():
     #Setting up the power supply
     print ("Turning on the power supply...\n")
     power_supply = setup_PS()
-
-    check_current_leakage(power_supply)
-    """    
+    
     if power_supply == PS_ERROR:
         print (PS_ERROR_MESSAGE)
         print ("Turning off output...")
@@ -754,8 +683,7 @@ def main():
         print (ERROR_END)
         return CONNECTION_ERROR
         
-    #User input to get the rb offset
-    #gain_rb_offset = input ("Set rb_offset to: ")
+    #Set the gain rb_offset for the PUSCH signal
     gain_rb_offset = 0
     
 	#Setting up DUT before sending PUSCH signal
@@ -764,6 +692,26 @@ def main():
     ser = tuple[0]
     CSW = tuple [1]
     
+    #Delete previous .csv file if it exists
+    if os.path.isfile(CSV):
+        os.remove(CSV)  
+        
+    #Writes the header of the .csv file    
+    file = open(CSV, 'wb')
+    file.write("Date & Time of Test:\t" + datetime.datetime.strftime(datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S') + "\n") 
+    file.write ("DUT:\t\t\t\t\t"+ DUT + "\n")
+    file.write("SN:\t\t\t\t\t\t" + SN + "\n")
+    file.write ("CSW(2c0):\t\t\t\t" + str(CSW) + "28\n")
+    #file.write ("RB:\t\t\t\t\t\t" + str(RB)+ "\n")
+    #file.write("Scale:\t\t\t\t\t0x" + str(HEX) + "\n")
+    file.write ("RB Offset:\t\t\t\t" + str(gain_rb_offset) + "\n")
+    file.write("VSS_2V0_3V3:\t\t\t" + str(VOLT) + "V\n")
+    #file.write("\n")
+    file.close()
+    with open (CSV,'ab') as result:
+        wr = csv.DictWriter(result, fieldnames = fieldnames)
+        wr.writeheader()    
+        
     if tuple[0] == SERIAL_ERROR:
         print (SERIAL_ERROR_MESSAGE)
         print ("Turning off output...")
@@ -783,10 +731,6 @@ def main():
   
     #Iterates throught PA_Mode, PA_Bias, PA_VCC, RB, Gain
     #and storing the TX Quality calculations
-  
-    #Delete previous .csv file 
-    if os.path.isfile(CSV):
-        os.remove(CSV)  
         
     #PA_MODE Loop (#1)
     for mode in  power_modes:
@@ -859,32 +803,31 @@ def main():
                                     else:
                                         ser.read()
                                     
-                                    
+                                    """
                                     #242 is also for setting gain (ANA_dac_r1 Register)
                                     #For fine gain 
                                     #'Keep at default; vary to reduct distortions only'
-                                    #if (DEBUG == True):
-                                    #    print ("Writing to 242...")
-                                    
-                                    #ser.write("wr 242 4444\n")
+                                    if (DEBUG == True):
+                                        print ("Writing to 242...")
+       
+                                    ser.write("wr 242 4444\n")
 
-                                    #if (DEBUG == True):
-                                    #    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-                                    #else:
-                                    #    ser.read()
+                                    if (DEBUG == True):
+                                        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+                                    else:
+                                        ser.read()
                                     
                                     
-                                    #ser.write ("rd 2c0\n")
-                                    #if DEBUG == True:
-                                    #    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-                                    #else:
-                                    #    ser.read()  
+                                    ser.write ("rd 2c0\n")
+                                    if DEBUG == True:
+                                        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+                                    else:
+                                        ser.read()  
                                     #time.sleep(1)
-                                    
+                                    """
                                     
                                     
                                     #Measure the avg_power and txquality
-
                                     tx_results = measure_tx(mode, bias, vcc_value, RB, HEX, gain, gain_rb_offset, power_supply)
                 
                                     #Exit early in the case of calculation error
@@ -904,51 +847,13 @@ def main():
                                         raw_input("\n\n\tPress a key to Continue\t\n\n")
                                         setup_connection()
 		
-                                    #Writes header if there is none
-                                    if not os.path.isfile(CSV):               
-                                        with open (CSV,'ab') as result:
-                                            wr = csv.DictWriter(result, tx_results.keys())
-                                            wr.writeheader()
-                       
 		
                                     #Writing the rest of the non-header data to the file
                                     with open (CSV,'ab') as result:
-                                        wr = csv.DictWriter(result, tx_results.keys())
-			
+                                        wr = csv.DictWriter(result, fieldnames = fieldnames)
                                         wr.writerow(tx_results)
               
-                
-    #Trying to reorder the file by setting the columns
-    fieldnames = [
-    "PA Mode", "PA Bias", "PA VCC (V)","nRB Value", "Scale","Gain Value", "Average Power (dBm)",
-    "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
-    "Average Data EVM (%)", "Average Peak Data EVM (%)",
-    "Average RS EVM (%)","Average Peak RS EVM (%)",
-    "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
-    "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Current (A)"]
-
-    with open(CSV,'rb') as original, open (ORD_CSV, 'ab') as ordered:
-        wr = csv.DictWriter(ordered, fieldnames = fieldnames)
-        #Write starting data to the file
-        file = open(ORD_CSV, 'wb')
-        file.write("Date & Time of Test:\t" + datetime.datetime.strftime(datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S') + "\n") 
-        file.write ("DUT:\t\t\t\t\t"+ DUT + "\n")
-        file.write("SN:\t\t\t\t\t\t" + SN + "\n")
-        file.write ("CSW(2c0):\t\t\t\t" + str(CSW) + "28\n")
-        #file.write ("RB:\t\t\t\t\t\t" + str(RB)+ "\n")
-        #file.write("Scale:\t\t\t\t\t0x" + str(HEX) + "\n")
-        file.write ("RB Offset:\t\t\t\t" + str(gain_rb_offset) + "\n")
-        file.write("VSS_2V0_3V3:\t\t\t" + str(VOLT) + "V\n")
-        #file.write("\n")
-        file.close()
-        wr.writeheader()
-        for row in csv.DictReader(original):
-            wr.writerow(row)
-
-    #Remove the unsorted file, and rename the ordered file to the original.
-    os.remove(CSV)
-    os.rename(ORD_CSV,CSV)
-            
+    
     #Turn off the output
     power_supply.write(":OUTPUT:STATE OFF")
     time.sleep(0.1)
@@ -964,9 +869,8 @@ def main():
         print (ERROR_END)
         return SPEC_ERROR
         
-    
     return SUCCESS
-    """
+
 
     
 """ 
