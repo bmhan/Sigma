@@ -24,8 +24,14 @@ import time
 import csv
 import sys
 import os
-
-
+CSV = "Sweep_crystal.csv"
+fieldnames = [
+"Crystal","Average Power (dBm)",
+"Average IQ Offset (dB)", "Average Frequency Error (Hz)",
+"Average Data EVM (%)", "Average Peak Data EVM (%)",
+"Average RS EVM (%)","Average Peak RS EVM (%)",
+"Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
+"ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Current (A)"]
 HOST = '10.10.14.202'
 PORT = 24000
 COM = 'COM8'
@@ -36,9 +42,10 @@ CURR_LIMIT = 2
 FREQ_ERROR = 100000
 EVM_LIMIT = 6
 CSW = ""
-DUT = "miniUT Rev E8"
-#DUT = "UT PROTO"
-SN = "10" #TODO CHANGE
+#DUT = "miniUT Rev E8"
+DUT = "UT PROTO"
+#SN = "10" #TODO CHANGE
+SN = "UT PROTO 1"
 INPUT_CSV = 'input_rb_hex.csv'
 GAIN_START = 4
 GAIN_STOP = 70
@@ -46,9 +53,9 @@ BLOCK_READ_SIZE = 1024
 RB = 0
 HEX = 0
 table = [0,1,2,3,4,5,10,20,30,40,50,60,70]
-#freq_array = ['1f','1e', '1d', '1c', '1b', '1a', '19', '18', '17', '16', '15', '14', '13', '12', '11', '10',
-#              'f','d','e','c','b','a', '9', '8', '7', '6', '5', '4', '3', '2', '1', '0']
-freq_array = ['f','e','d','c','b','a']
+freq_array = ['1f','1e', '1d', '1c', '1b', '1a', '19', '18', '17', '16', '15', '14', '13', '12', '11', '10',
+              'f','d','e','c','b','a', '9', '8', '7', '6', '5', '4', '3', '2', '1', '0']
+#freq_array = ['f','e','d','c','b','a']
 
 #Set this value to True if you want more debug statements
 DEBUG = False
@@ -68,7 +75,7 @@ params:
 return: 
     Dictionary of information 
 """
-def measure_tx(rb, hex, gain, rb_offset,power_supply): 
+def measure_tx(crystal,rb, hex, gain, rb_offset,power_supply): 
     if (power_supply != 0):
         print ("Performing Analysis for rb " + str(rb) + "\tscaling " + str(hex) + "\tgain " + str(gain) + "\trb offset " + str(rb_offset) + "...\n")
 
@@ -176,7 +183,8 @@ def measure_tx(rb, hex, gain, rb_offset,power_supply):
 	#Storing the results to be written to the .csv file
     #result_dict['nRB Value'] = rb
     #result_dict['Hex Value'] = hex
-    result_dict['Gain Value'] = gain
+    result_dict['Crystal'] = crystal
+    #result_dict['Gain Value'] = gain
     #result_dict['RB Offset'] = rb_offset
     result_dict['Average IQ Offset (dB)'] = round(float(txq_array[1]),2)
     result_dict['Average Frequency Error (Hz)'] = round(float(txq_array[2]),2)
@@ -303,7 +311,7 @@ def setup_crystal(ser):
     
     if (DEBUG == True):
         print("Sending PUSCH signal for crystal ...\n")
-    ser.write("d 35 " + str(16) + " 0 " + "179C\n")
+    ser.write("d 35 " + str(1) + " 0 " + "97A0\n")
     if (DEBUG == True):
         print("DUT response: " + ser.read(BLOCK_READ_SIZE))
     
@@ -315,8 +323,13 @@ def setup_crystal(ser):
             print("DUT response: " + ser.read(BLOCK_READ_SIZE))	
         
         #Perform the calculation, want to look at the data evm and freq error
-        tx_results = measure_tx(0,0,0,0,0)
+        tx_results = measure_tx(CSW_XOSC,0,0,16,0,0)
     
+        #Writing the rest of the non-header data to the file
+        with open (CSV,'ab') as result:
+            wr = csv.DictWriter(result, fieldnames = fieldnames)
+            wr.writerow(tx_results)
+            
         #Compare the recent calculations to what we have currently
         if (abs (tx_results['Average Frequency Error (Hz)']) < abs(freq_curr) and
             abs (tx_results['Average Data EVM (%)']) < data_curr):
@@ -375,11 +388,6 @@ def main():
     print ("Turning on the power supply...\n")
     power_supply = setup_PS()
     
-    while True:
-        power_supply.write(":MEAS:CURR?")
-        time.sleep(0.1)
-        print (power_supply.read())
-        time.sleep(2)
     
     #Setting up connection to Litepoint
     #this is a simple conceptual calibration procedure
@@ -388,7 +396,21 @@ def main():
     #User input to get the rb offset
     #gain_rb_offset = input ("Set rb_offset to: ")
     gain_rb_offset = 0
-    
+        
+    file = open(CSV, 'wb')
+    file.write("Date & Time of Test:\t" + datetime.datetime.strftime(datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S') + "\n") 
+    file.write ("DUT:\t\t\t\t\t"+ DUT + "\n")
+    file.write("SN:\t\t\t\t\t\t" + SN + "\n")
+    #file.write ("CSW(2c0):\t\t\t\t" + str(CSW) + "28\n")
+    #file.write ("RB:\t\t\t\t\t\t" + str(RB)+ "\n")
+    #file.write("Scale:\t\t\t\t\t0x" + str(HEX) + "\n")
+    file.write ("RB Offset:\t\t\t\t" + str(gain_rb_offset) + "\n")
+    file.write("VSS_2V0_3V3:\t\t\t" + str(VOLT) + "V\n")
+    #file.write("\n")
+    file.close()
+    with open (CSV,'ab') as result:
+        wr = csv.DictWriter(result, fieldnames = fieldnames)
+        wr.writeheader()
 	#Setting up DUT before sending PUSCH signal
     #Makes a call to setup_crystal
     tuple = setup_DUT()
@@ -425,157 +447,8 @@ def main():
         print("DUT response: " + ser.read(BLOCK_READ_SIZE))  
     """
     
-    #Iterates throught the array of RB values, performing
-    #and storing the TX Quality calculations
-    with open (INPUT_CSV, "rb") as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-	#for rb in RB_ARRAY:   
-		
-            RB = row ['rb']
-            HEX = row['hex']
-            CSV = DUT + "_SN_" + str(SN) + "_rb_" + str(RB) + "_rb_offset_" + str(gain_rb_offset) + ".csv"
-            ORD_CSV = DUT + "_SN_" + str(SN) + "_rb_" + str(RB) + "_rb_offset_" + str(gain_rb_offset) + "ordered.csv"
+    
 
-            if os.path.isfile(CSV):
-                os.remove(CSV)
-            
-
-            
-            #Sending PUSCH signal with inputed RB, gain, scale
-			#Form: d 35 12 0 98ff
-            print("PUSCH command...\n")
-            ser.write("d 35 " + str(RB) + " " + str(gain_rb_offset) + " "+ str(HEX) + "\n")
-            if DEBUG == True:
-                print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-              
-            #Necessary delay for the very first reading
-            time.sleep(0.1)
-            
-	        #Second loop to sweep through the gain 
-            #TODO : Switch back to user input with xrange if you want more data points
-            #for gain in xrange (GAIN_START, GAIN_STOP + 1):
-            for gain in table:
-
-                if (DEBUG == True):
-                    print ("Setting gain...")
-
-                ser.write("d 26 " + str(gain) + "\n")
-
-                
-                if (DEBUG == True):
-                    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-
-                """
-                if (DEBUG == True):
-                    print ("Writing to 242...")
-
-                ser.write("wr 242 4444\n")
-                """
-                
-                if (DEBUG == True):
-                    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-                
-	
-	            #Measure the avg_power and txquality
-                tx_results = measure_tx(RB, HEX, gain, gain_rb_offset, power_supply)
-                
-                #Stop procedure (uncomment to use!)
-                #Close socket connection to enable GUI access
-                #Ask for raw_input to temporarily pause execution
-                #scpi.close()    
-                #raw_input("\n\n\tPress a key to Continue\t\n\n")
-                #scpi = setup_connection()
-		
-                #Writes header if there is none
-                if not os.path.isfile(CSV):               
-                    with open (CSV,'ab') as result:
-                        wr = csv.DictWriter(result, tx_results.keys())
-                        wr.writeheader()
-                       
-		
-                #Writing the rest of the non-header data to the file
-                with open (CSV,'ab') as result:
-                    wr = csv.DictWriter(result, tx_results.keys())
-			
-                    wr.writerow(tx_results)
-                   
-            fieldnames = [
-    "Gain Value", "Average Power (dBm)",
-    "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
-    "Average Data EVM (%)", "Average Peak Data EVM (%)",
-    "Average RS EVM (%)","Average Peak RS EVM (%)",
-    "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
-    "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Current (A)"]
-
-            with open(CSV,'rb') as original, open (ORD_CSV, 'ab') as ordered:
-                wr = csv.DictWriter(ordered, fieldnames = fieldnames)
-                    #Write starting data to the file
-                file = open(ORD_CSV, 'wb')
-                file.write("Date & Time of Test:\t" + datetime.datetime.strftime(datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S') + "\n") 
-                file.write ("DUT:\t\t\t\t\t"+ DUT + "\n")
-                file.write("SN:\t\t\t\t\t\t" + SN + "\n")
-                file.write ("CSW(2c0):\t\t\t\t" + str(CSW) + "28\n")
-                file.write ("RB:\t\t\t\t\t\t" + str(RB)+ "\n")
-                file.write("Scale:\t\t\t\t\t0x" + str(HEX) + "\n")
-                file.write ("RB Offset:\t\t\t\t" + str(gain_rb_offset) + "\n")
-                file.write("VSS_2V0_3V3:\t\t\t" + str(VOLT) + "V\n")
-                #file.write("\n")
-                file.close()
-                wr.writeheader()
-                for row in csv.DictReader(original):
-                    wr.writerow(row)
-
-            #TODO Remove the unsorted file, and rename the ordered file to the original.
-            os.remove(CSV)
-            os.rename(ORD_CSV,CSV)
-            
-    #Turn off the output
-    power_supply.write(":OUTPUT:STATE OFF")
-    time.sleep(0.1)
-	
-    #Trying to reorder the file, by setting the columns
-    """
-    fieldnames = [
-    "Date & Time","nRB Value", "RB Offset", "Hex Value", "Gain Value", "Average Power (dBm)",
-    "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
-    "Average Data EVM (%)", "Average Peak Data EVM (%)",
-    "Average RS EVM (%)","Average Peak RS EVM (%)",
-    "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
-    "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Voltage (V)", "Current (A)"]
-    """
-    """
-    fieldnames = [
-    "Gain Value", "Average Power (dBm)",
-    "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
-    "Average Data EVM (%)", "Average Peak Data EVM (%)",
-    "Average RS EVM (%)","Average Peak RS EVM (%)",
-    "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
-    "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Current (A)"]
-
-    with open(CSV,'rb') as original, open (ORD_CSV, 'ab') as ordered:
-        wr = csv.DictWriter(ordered, fieldnames = fieldnames)
-        #Write starting data to the file
-        file = open(ORD_CSV, 'wb')
-        file.write("Date & Time of Test:\t" + datetime.datetime.strftime(datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S') + "\n") 
-        file.write ("DUT:\t\t\t\t\t"+ DUT + "\n")
-        file.write("SN:\t\t\t\t\t\t" + SN + "\n")
-        file.write ("CSW(2c0):\t\t\t\t" + str(CSW) + "28\n")
-        file.write ("RB:\t\t\t\t\t\t" + str(RB)+ "\n")
-        file.write("Scale:\t\t\t\t\t0x" + str(HEX) + "\n")
-        file.write ("RB Offset:\t\t\t\t" + str(gain_rb_offset) + "\n")
-        file.write("VSS_2V0_3V3:\t\t\t" + str(VOLT) + "V\n")
-        #file.write("\n")
-        file.close()
-        wr.writeheader()
-        for row in csv.DictReader(original):
-            wr.writerow(row)
-        
-    #TODO Remove the unsorted file, and rename the ordered file to the original.
-    os.remove(CSV)
-    os.rename(ORD_CSV,CSV)
-    """
-    return True
 
 
 

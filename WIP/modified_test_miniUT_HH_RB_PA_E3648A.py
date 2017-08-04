@@ -25,10 +25,10 @@ import serial
 import csv
 import sys
 import os
-
+#"PA Mode", "PA Bias", "PA VCC (V)","nRB Value", "Scale","Gain Value",
 #Order of the .csv columns
 fieldnames = [
-"PA Mode", "PA Bias", "PA VCC (V)","nRB Value", "Scale","Gain Value", "Average Power (dBm)",
+"Crystal","Average Power (dBm)",
 "Average IQ Offset (dB)", "Average Frequency Error (Hz)",
 "Average Data EVM (%)", "Average Peak Data EVM (%)",
 "Average RS EVM (%)","Average Peak RS EVM (%)",
@@ -62,16 +62,16 @@ freq_array = ['1f','1e', '1d', '1c', '1b', '1a', '19', '18', '17', '16', '15', '
              'f','d','e','c','b','a', '9', '8', '7', '6', '5', '4', '3', '2', '1', '0']
 LOW_POWER = '7e'
 HIGH_POWER = '7c'
-power_modes = [LOW_POWER, HIGH_POWER]
-#power_modes = [HIGH_POWER]
+#power_modes = [LOW_POWER, HIGH_POWER]
+power_modes = [HIGH_POWER]
 power_dict =    {
                 '7e': 'low power',
                 '7c': 'high power'
                 }
 
                 
-bias_array = ['0','10','20','30', '7f', '9c']
-#bias_array = ['9c']
+#bias_array = ['0','10','20','30', '7f', '9c']
+bias_array = ['9c']
 
 
 PULL_HIGH = '6a2'
@@ -95,7 +95,7 @@ HEX = 0
 GAIN_START = 0
 GAIN_STOP = 70 #TODO CHANGE
 
-#GAIN_TABLE = [0,1,2,3,4,5,10,20,30,40,50,60,70]
+GAIN_TABLE = [0,1,2,3,4,5,10,20,30,40,50,60,70]
 
 INPUT_SPEC = 'input_spec.txt'
 HAS_HEADER = False
@@ -151,7 +151,7 @@ params:
 return: 
     Dictionary of information or CALC_ERROR if the calculations were not mades
 """
-def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply): 
+def measure_tx(crystal,mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply): 
     if (power_supply != 0):
         print ("Performing Analysis for PA mode " + power_dict[mode] + 
                ", PA bias " + str(bias) + ", PA VCC " + str(vcc_dict[vcc_value]) +
@@ -240,13 +240,14 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
    
     #Printing the result of the TXQuality test to the command line
     if (DEBUG == True):
-        print ("\nPA Mode: \t\t\t\t" + power_dict[mode])
-        print ("\nPA Bias: \t\t\t\t" + str(bias))
-        print ("\nPA VCC: \t\t\t\t" + vcc_dict[vcc_value])
-        print ("\nRB Value: \t\t\t\t" + str(rb))
-        print ("\nRB Offset: \t\t\t\t" + str(rb_offset))
-        print ("\nHex Value: \t\t\t\t" + str(hex))
-        print ("\nGain Value: \t\t\t\t" + str(gain))
+        #print ("\nPA Mode: \t\t\t\t" + power_dict[mode])
+        #print ("\nPA Bias: \t\t\t\t" + str(bias))
+        #print ("\nPA VCC: \t\t\t\t" + vcc_dict[vcc_value])
+        #print ("\nRB Value: \t\t\t\t" + str(rb))
+        #print ("\nRB Offset: \t\t\t\t" + str(rb_offset))
+        #print ("\nHex Value: \t\t\t\t" + str(hex))
+        #print ("\nGain Value: \t\t\t\t" + str(gain))
+        print ("\nCrystal: \t\t\t\t" + str(gain))
         print ("\nStatus Code: \t\t\t\t" + str(float(txq_array[0])))
         print ("Average_IQ_Offset (dB): \t\t" + str(float(txq_array[1])))
         print ("Average_Frequency_Error (Hz): \t\t" + str(float(txq_array[2])))
@@ -266,13 +267,14 @@ def measure_tx(mode, bias, vcc_value, rb, hex, gain, rb_offset,power_supply):
         print ("Average Power (dBm): \t\t\t" + str(float(result_dict['Average Power (dBm)'])) + '\n\n')
 	
 	#Storing the results to be written to the .csv file
-    result_dict['PA Mode'] = power_dict[mode]
-    result_dict['PA Bias'] = str(bias)
-    result_dict['PA VCC (V)'] = vcc_dict[vcc_value]
-    result_dict['nRB Value'] = rb
-    result_dict['Scale'] = '0x' + str(hex)
-    result_dict['Gain Value'] = gain
+    #result_dict['PA Mode'] = power_dict[mode]
+    #result_dict['PA Bias'] = str(bias)
+    #result_dict['PA VCC (V)'] = vcc_dict[vcc_value]
+    #result_dict['nRB Value'] = rb
+    #result_dict['Scale'] = '0x' + str(hex)
+    #result_dict['Gain Value'] = gain
     #result_dict['RB Offset'] = rb_offset
+    result_dict['Crystal'] = crystal
     result_dict['Average IQ Offset (dB)'] = round(float(txq_array[1]),2)
     result_dict['Average Frequency Error (Hz)'] = round(float(txq_array[2]),2)
     result_dict['Average Data EVM (%)'] = round(float(txq_array[3]),2)
@@ -459,7 +461,7 @@ param -
 return - The CSW value to calibrate the crystal or
          FREQ_ERROR if a CSW value could not be found
 """
-def setup_crystal(ser):
+def setup_crystal(ser, CSV, power_supply):
     freq_curr = FREQ_ERROR
     data_curr = EVM_LIMIT
     freq_char = ''
@@ -478,8 +480,13 @@ def setup_crystal(ser):
             print("DUT response: " + ser.read(BLOCK_READ_SIZE))	
         
         #Perform the calculation, want to look at the data evm and freq error
-        tx_results = measure_tx(HIGH_POWER,0,'682682682',0,0,0,0,0)
+        tx_results = measure_tx(CSW_XOSC, HIGH_POWER,0,'682682682',0,0,0,0,power_supply)
     
+        #Writing the rest of the non-header data to the file
+        with open (CSV,'ab') as result:
+            wr = csv.DictWriter(result, fieldnames = fieldnames)
+            wr.writerow(tx_results)
+        
         #Compare the recent calculations to what we have currently
         if (abs (tx_results['Average Frequency Error (Hz)']) < abs(freq_curr) and
             abs (tx_results['Average Data EVM (%)']) < data_curr):
@@ -649,7 +656,55 @@ return - 0 if the test was successful, error values otherwise that
          vary depending on what the error was
 """
 def main():
+    gain_rb_offset = 0
     
+    CSV = DUT + "_SN_" + str(SN) + ".csv"
+
+    
+    #Setting up the power supply
+    print ("Turning on the power supply...\n")
+    power_supply = setup_PS()
+    
+    #Setting up connection to Litepoint
+    #this is a simple conceptual calibration procedure
+    connection_result = setup_connection() 
+    
+    #Setting up DUT before sending PUSCH signal
+    #Makes a call to setup_crystal
+        #Establish connection to DUT
+    ser = serial.Serial(COM, 115200, timeout = 5)
+
+
+    print ("\nInitializing DUT...\n")
+    ser.write("d 9\n")
+    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+    
+    print ("Tx...\n")
+    ser.write("d 20\n")
+    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+
+    file = open(CSV, 'wb')
+    file.write("Date & Time of Test:\t" + datetime.datetime.strftime(datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S') + "\n") 
+    file.write ("DUT:\t\t\t\t\t"+ DUT + "\n")
+    file.write("SN:\t\t\t\t\t\t" + SN + "\n")
+    #file.write ("CSW(2c0):\t\t\t\t" + str(CSW) + "28\n")
+    #file.write ("RB:\t\t\t\t\t\t" + str(RB)+ "\n")
+    #file.write("Scale:\t\t\t\t\t0x" + str(HEX) + "\n")
+    file.write ("RB Offset:\t\t\t\t" + str(gain_rb_offset) + "\n")
+    file.write("VSS_2V0_3V3:\t\t\t" + str(VOLT) + "V\n")
+    #file.write("\n")
+    file.close()
+    with open (CSV,'ab') as result:
+        wr = csv.DictWriter(result, fieldnames = fieldnames)
+        wr.writeheader()
+        
+    #Setting up 2c0 (crystal)
+    print ("Setting up 2c0 (crystal)...\n")
+    CSW = setup_crystal(ser, CSV, power_supply)
+    
+    
+
+    """
     print ("\nRunning miniUT test...\n")
 
     #Enable Logging if set
@@ -758,8 +813,10 @@ def main():
                             continue
                         print ("Setting the VCC to " + pull_18 + " " + pull_17
                                 + " " + pull_16 + ",where 6a2 is high and 682 is low\n...")
-                        setup_PA_VCC(ser,pull_18,pull_17,pull_16)
-                        vcc_value = pull_18 + pull_17 + pull_16
+                        #setup_PA_VCC(ser,pull_18,pull_17,pull_16)
+                        #vcc_value = pull_18 + pull_17 + pull_16
+                        setup_PA_VCC(ser,PULL_HIGH,PULL_HIGH,PULL_LOW)
+                        vcc_value = PULL_HIGH + PULL_HIGH + PULL_LOW
                         with open (INPUT_CSV, "rb") as file:
                             reader = csv.DictReader(file)
         
@@ -793,8 +850,8 @@ def main():
                                 
                                 #Gain Loop (#5) 
                                 #Switch back to user input with xrange if you want more data points
-                                for gain in xrange (GAIN_START, GAIN_STOP + 1):
-                                #for gain in GAIN_TABLE:
+                                #for gain in xrange (GAIN_START, GAIN_STOP + 1):
+                                for gain in GAIN_TABLE:
 
                                     if (DEBUG == True):
                                         print ("Setting gain...")
@@ -806,29 +863,7 @@ def main():
                                     else:
                                         ser.read()
                                     
-                                    """
-                                    #242 is also for setting gain (ANA_dac_r1 Register)
-                                    #For fine gain 
-                                    #'Keep at default; vary to reduct distortions only'
-                                    if (DEBUG == True):
-                                        print ("Writing to 242...")
-       
-                                    ser.write("wr 242 4444\n")
-
-                                    if (DEBUG == True):
-                                        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-                                    else:
-                                        ser.read()
-                                    
-                                    
-                                    ser.write ("rd 2c0\n")
-                                    if DEBUG == True:
-                                        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-                                    else:
-                                        ser.read()  
-                                    #time.sleep(1)
-                                    """
-                                    
+   
                                     
                                     #Measure the avg_power and txquality
                                     tx_results = measure_tx(mode, bias, vcc_value, RB, HEX, gain, gain_rb_offset, power_supply)
@@ -873,7 +908,7 @@ def main():
         return SPEC_ERROR
         
     return SUCCESS
-
+    """
 
     
 """ 
