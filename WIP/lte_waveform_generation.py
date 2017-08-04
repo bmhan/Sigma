@@ -3,7 +3,7 @@
 # Purpose:     Example IQxstream Python Application
 #
 # Created:     05/15/2017
-# Last Updated: 7/20/17
+# Last Updated: 7/31/17
 # -------------------------------------------------------------------------------
 import socket_interface as scpi
 
@@ -40,7 +40,8 @@ def main():
     scpi.send('CONFigure:WAVE:PDCCh:DCISetup2:HARQ:ARRay (0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7);')
 
     # Radio Network Temporary Identifier
-    scpi.send('CONFigure:WAVE:RNTI 65535;')
+    #Edited 7/31/17
+    scpi.send('CONFigure:WAVE:RNTI 14;')
 
     # Cell ID
     scpi.send('CONFigure:WAVE:CID 0;')

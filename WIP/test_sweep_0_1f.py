@@ -24,10 +24,9 @@ import time
 import csv
 import sys
 import os
-CSV = "Sweep_crystal.csv"
 fieldnames = [
 "Crystal","Average Power (dBm)",
-"Average IQ Offset (dB)", "Average Frequency Error (Hz)",
+"Average Frequency Error (Hz)", "Average IQ Offset (dB)",
 "Average Data EVM (%)", "Average Peak Data EVM (%)",
 "Average RS EVM (%)","Average Peak RS EVM (%)",
 "Average IQ Imbalance Gain (dB)", "Average IQ Imbalance Phase (deg)",
@@ -40,29 +39,33 @@ CABLE_LOSS_DB = 11
 VOLT = 2.5 #TODO CHANGE
 CURR_LIMIT = 2
 FREQ_ERROR = 100000
+FREQ_DELTA = 2000
+FREQ_ACC = 1000
 EVM_LIMIT = 6
 CSW = ""
 #DUT = "miniUT Rev E8"
 DUT = "UT PROTO"
 #SN = "10" #TODO CHANGE
 SN = "UT PROTO 1"
+CSV = "RB_50_miniUT_11_Sweep_crystal.csv"
 INPUT_CSV = 'input_rb_hex.csv'
 GAIN_START = 4
 GAIN_STOP = 70
 BLOCK_READ_SIZE = 1024
-RB = 0
-HEX = 0
+RB = 50
+HEX = 1758
 table = [0,1,2,3,4,5,10,20,30,40,50,60,70]
-freq_array = ['1f','1e', '1d', '1c', '1b', '1a', '19', '18', '17', '16', '15', '14', '13', '12', '11', '10',
-              'f','d','e','c','b','a', '9', '8', '7', '6', '5', '4', '3', '2', '1', '0']
+#freq_array = ['1f','1e', '1d', '1c', '1b', '1a', '19', '18', '17', '16', '15', '14', '13', '12', '11', '10',
+#              'f','d','e','c','b','a', '9', '8', '7', '6', '5', '4', '3', '2', '1', '0']
+freq_array = ['0','1','2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', '10', '11', '12',
+               '13', '14', '15', '16', '17', '18', '19', '1a', '1b', '1c', '1d', '1e', '1f']
+CSW_CENTER = '9'
 #freq_array = ['f','e','d','c','b','a']
 
 #Set this value to True if you want more debug statements
 DEBUG = False
 
-#RB_ARRAY = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,
-#50,54,60,64,72,75,80,81,90,96,100]
-#RB_ARRAY = [1,2,6]
+
 
 
 """
@@ -202,39 +205,6 @@ def measure_tx(crystal,rb, hex, gain, rb_offset,power_supply):
     #datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S')  
     return result_dict
     
-	
-
-
-"""
-Function plays a .iqvsg file as the VSG
-param:
-    waveform_file - The nameof the waveform file to play
-"""
-def play_waveform(waveform_file):
-    # enable port RF1A with VSG
-    print ("Loading the waveform " + waveform_file + "...\n")
-    scpi.send('VSG; WAVE:LOAD "/USER/' + waveform_file + '"')
-    scpi.send('VSG; WAVE:EXEC ON')
-    ret = scpi.send('*WAI; SYST:ERR:ALL?')
-    print ("Status: ", ret)
-
-
-
-"""
-Function setups the vsg
-param:
-    frequency - frequency to set the VSG
-    power - power to set the VSG
-"""
-def setup_vsg(frequency, power):
-    print ("Setting up the VSG with frequency " + str(frequency) +
-    " and power " + str(power) + "...\n")
-    scpi.send('VSG; FREQ ' + str(frequency))
-    scpi.send('POW:LEV ' + str(power))
-    ret = scpi.send('*WAI; SYST:ERR:ALL?')
-    print ("Status: ", ret)
-
-
 
 """
 Function sets up socket connection to the IQxstream
@@ -265,7 +235,11 @@ def setup_DUT():
 
     #Establish connection to DUT
     ser = serial.Serial(COM, 115200, timeout = 5)
-
+    
+    print ("\n Enable debug messages if firmware requires...\n")
+    ser.write ("log 2\n")
+    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+    
     print ("\nInitializing DUT...\n")
     ser.write("d 9\n")
     print("DUT response: " + ser.read(BLOCK_READ_SIZE))
@@ -288,12 +262,6 @@ def setup_DUT():
     #ser.write("rffe_wrreg f 1 9c\n")
     #print("DUT response: " + ser.read(BLOCK_READ_SIZE))
 	
-	#TODO: Remove later when testing board 53-0012-01
-    #print ("Gain and Offset...\n")
-    #ser.write("d 27 -31 -36 904 914 0 -6\n")
-    #ser.write("d 27 -14 11 4 14 0 -7\n")
-    #print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-	
     return (ser,CSW)
 	
     
@@ -311,31 +279,123 @@ def setup_crystal(ser):
     
     if (DEBUG == True):
         print("Sending PUSCH signal for crystal ...\n")
-    ser.write("d 35 " + str(1) + " 0 " + "97A0\n")
-    if (DEBUG == True):
-        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+    ser.write("d 35 " + str(RB) + " 0 " + str(HEX) + "\n")
+    print("DUT response: " + ser.read(BLOCK_READ_SIZE))   
     
-    for CSW_XOSC in freq_array:
-        if (DEBUG == True):
-            print ("Writing 2c0 "+ str(CSW_XOSC) + "28...\n")
-        ser.write("wr 2c0 " + str(CSW_XOSC) + "28\n")
-        if (DEBUG == True):
-            print("DUT response: " + ser.read(BLOCK_READ_SIZE))	
+    ####################################################################
+    #Logic to test for the optimal CSW quickly (four - test process)
+
+    print ("Writing 2c0 "+ str(CSW_CENTER) + "28...\n")
+    ser.write("wr 2c0 " + str(CSW_CENTER) + "28\n")
+    print("DUT response: " + ser.read(BLOCK_READ_SIZE))	 
+
+    #Perform the calculation, look at the center data evm and freq error
+    tx_results = measure_tx(CSW_CENTER,0,0,16,0,0)
+
+    #Writing the rest of the non-header data to the file
+    with open (CSV,'ab') as result:
+        wr = csv.DictWriter(result, fieldnames = fieldnames)
+        wr.writerow(tx_results)
         
-        #Perform the calculation, want to look at the data evm and freq error
-        tx_results = measure_tx(CSW_XOSC,0,0,16,0,0)
+    freq_curr = tx_results['Average Frequency Error (Hz)']
+    data_curr = tx_results['Average Data EVM (%)']
+    freq_char = CSW_CENTER
     
-        #Writing the rest of the non-header data to the file
+    #Check if the center is our value
+    if (abs(freq_curr) < FREQ_ACC and data_curr < EVM_LIMIT):
+        return freq_char
+        
+    #Performs another check based off FREQ_DELTA seen in data
+    elif (abs(freq_curr) < FREQ_ERROR):
+        #Determines index of next char to test the crystal, hopefully our optimal
+        #CSW
+        freq_offset = int(freq_curr / FREQ_DELTA)
+        freq_char = freq_array[int(freq_array.index(CSW_CENTER) + freq_offset)]    
+
+        print ("Writing 2c0 "+ str(freq_char) + "28...\n")
+        ser.write("wr 2c0 " + str(freq_char) + "28\n")
+        if (DEBUG == True):
+            print("DUT response: " + ser.read(BLOCK_READ_SIZE))	 
+        
+        #Measure and record the new frequency error and data EVM 
+        tx_results = measure_tx(freq_char,0,0,16,0,0)
+        freq_curr = tx_results['Average Frequency Error (Hz)']
+        data_curr = tx_results['Average Data EVM (%)']         
+    
+            #Writing the rest of the non-header data to the file
         with open (CSV,'ab') as result:
             wr = csv.DictWriter(result, fieldnames = fieldnames)
             wr.writerow(tx_results)
             
-        #Compare the recent calculations to what we have currently
-        if (abs (tx_results['Average Frequency Error (Hz)']) < abs(freq_curr) and
-            abs (tx_results['Average Data EVM (%)']) < data_curr):
+        #Performs check in case of one-off frequency
+        if (abs(freq_curr) > FREQ_ACC and abs(freq_curr) < FREQ_ACC * 2):
+            #Determines index of next char to test the crystal, hopefully our optimal
+            #CSW
+            freq_offset = 1 if freq_curr > 0 else -1
+            freq_char = freq_array[int(freq_array.index(freq_char) - freq_offset)]    
+
+            print ("Writing 2c0 "+ str(freq_char) + "28...\n")
+            ser.write("wr 2c0 " + str(freq_char) + "28\n")
+            if (DEBUG == True):
+                print("DUT response: " + ser.read(BLOCK_READ_SIZE))	 
+            
+            #Measure and record the new frequency error and data EVM 
+            tx_results = measure_tx(freq_char,0,0,16,0,0)
             freq_curr = tx_results['Average Frequency Error (Hz)']
-            data_curr = tx_results['Average Data EVM (%)']
-            freq_char = CSW_XOSC
+            data_curr = tx_results['Average Data EVM (%)']         
+        
+                #Writing the rest of the non-header data to the file
+            with open (CSV,'ab') as result:
+                wr = csv.DictWriter(result, fieldnames = fieldnames)
+                wr.writerow(tx_results)    
+            
+            #Performs check one last one-off check in the opposite direction
+            if (abs(freq_curr) > FREQ_ACC):
+                #Determines index of next char to test the crystal, hopefully our optimal
+                #CSW
+                freq_offset = -2 if freq_curr > 0 else 2
+                freq_char = freq_array[int(freq_array.index(freq_char) - freq_offset)]    
+
+                print ("Writing 2c0 "+ str(freq_char) + "28...\n")
+                ser.write("wr 2c0 " + str(freq_char) + "28\n")
+                if (DEBUG == True):
+                    print("DUT response: " + ser.read(BLOCK_READ_SIZE))	 
+                
+                #Measure and record the new frequency error and data EVM 
+                tx_results = measure_tx(freq_char,0,0,16,0,0)
+                freq_curr = tx_results['Average Frequency Error (Hz)']
+                data_curr = tx_results['Average Data EVM (%)']         
+            
+                    #Writing the rest of the non-header data to the file
+                with open (CSV,'ab') as result:
+                    wr = csv.DictWriter(result, fieldnames = fieldnames)
+                    wr.writerow(tx_results)    
+            
+    ###########################################################################
+    #In case the quick check failed
+    if abs(freq_curr) > FREQ_ACC:
+        for CSW_XOSC in freq_array:
+            if (DEBUG == True):
+                print ("Writing 2c0 "+ str(CSW_XOSC) + "28...\n")
+            ser.write("wr 2c0 " + str(CSW_XOSC) + "28\n")
+            if (DEBUG == True):
+                print("DUT response: " + ser.read(BLOCK_READ_SIZE))	
+            
+            #Perform the calculation, want to look at the data evm and freq error
+            print (CSW_XOSC + "\n")
+            tx_results = measure_tx(CSW_XOSC,0,0,16,0,0)            
+        
+            #Writing the rest of the non-header data to the file
+            with open (CSV,'ab') as result:
+                wr = csv.DictWriter(result, fieldnames = fieldnames)
+                wr.writerow(tx_results)
+                
+            #Compare the recent calculations to what we have currently
+            if (abs (tx_results['Average Frequency Error (Hz)']) < abs(freq_curr) and
+                abs (tx_results['Average Data EVM (%)']) < data_curr):
+                freq_curr = tx_results['Average Frequency Error (Hz)']
+                data_curr = tx_results['Average Data EVM (%)']
+                freq_char = CSW_XOSC
        
     #In the case where a right frequency setting is found, exits the entire script 
     if (freq_curr == FREQ_ERROR):
@@ -383,7 +443,7 @@ Main method performs the following:
 	files
 """
 def main():
-
+    starttime = time.time()
     #Setting up the power supply
     print ("Turning on the power supply...\n")
     power_supply = setup_PS()
@@ -417,7 +477,15 @@ def main():
     ser = tuple[0]
     CSW = tuple [1]
     
+    
+    print ("Time taken is: " + str(time.time() - starttime))
+    #Turning on output
+    print ("Turning off output...")
+    power_supply.write(":OUTPUT:STATE OFF")
+    time.sleep(1)
+    
     """
+    #Optional statements that may be implemented
     mode = '7c'
     print("Setting PA_Mode...\n")
     ser.write("rffe_wrreg f 0 " + mode + "\n")        
