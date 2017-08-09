@@ -7,7 +7,7 @@
 # A GUI that runs the test_miniUT_shortened script.
 # -----------------------------------------------------------------------------
 from Tkinter import *
-import test_miniUT_shortened as tester
+#import test_miniUT_shortened as tester
 import tkFont
 import time
 import os
@@ -23,7 +23,7 @@ class LTE_Test:
         self.master = master
         titleFont = tkFont.Font(family = "arial", size = 18, weight = tkFont.BOLD)
         self.bodyFont = tkFont.Font (family = "arial", size = 10)
-        Title = Label(master, text="MiniUT PCBA ATS\nEnter key values, or leave blank to use values from previous test", font = titleFont )
+        Title = Label(master, text="MiniUT PCBA ATS\nEnter key values", font = titleFont )
         Title.grid(row = 0, column = 0, columnspan = 4)
         
         #Run test button
@@ -46,11 +46,11 @@ class LTE_Test:
         self.CABLEWarning.grid(row = 3, column = 2) 
         
         self.HOSTText = StringVar()
-        self.HOSTText.trace('w', self.validate)
+        self.HOSTText.trace('rw', self.validate)
         self.SNText = StringVar()
-        self.SNText.trace('w', self.validate)
+        self.SNText.trace('rw', self.validate)
         self.CABLEText = StringVar()
-        self.CABLEText.trace('w', self.validate)     
+        self.CABLEText.trace('rw', self.validate)     
         
         #Entry for Litepoint HOST     
         HOSTEntry = Entry(master, textvariable = self.HOSTText)
@@ -66,10 +66,16 @@ class LTE_Test:
         CABLEEntry.grid (row = 3, column = 1)           
 
         #Reset all entries to default values
-        self.defaultVal = IntVar()
-        defaultEnable = Checkbutton (master, text = "Set all key values to default", variable = self.defaultVal)
+        defaultEnable = Button (master, text = "Set all key values to default",
+                        command = self.setDefaults)
         defaultEnable.grid (row = 3, column = 3)
        
+        #Reset all entries to previous values
+        previousEnable = Button (master, text = "Set all key values to previous"
+                + " test values",
+                        command = self.setPrevious)
+        previousEnable.grid (row = 2, column = 3)
+
         text_frame = Frame (master, width = 700, height = 300)
         text_frame.grid(row = 8, column = 0, columnspan = 4)
         self.text_box = Text(text_frame, state= NORMAL, height = 20, width = 80, relief = "sunken")
@@ -78,15 +84,17 @@ class LTE_Test:
         scroll_text.grid(row=0, column=4, sticky='nsew')
         self.text_box['yscrollcommand'] = scroll_text.set
 
+
         
     #Restricts the input of the COM and SN to valid inputs
     def validate (self, *dummy):
         
         self.testBtn.config(state=(NORMAL if (re.match("^[.0-9]*$", self.HOSTText.get())
-                                          #and self.SNText.get()
+                                          and self.SNText.get()
                                           and re.match("^[.0-9]*$", self.HOSTText.get())
-                                          #and self.CABLEText.get()
+                                          and self.HOSTText.get()
                                           and re.match("^[0-9]*$", self.CABLEText.get()))
+                                          and self.CABLEText.get()
                             else DISABLED))  
 
   
@@ -101,11 +109,37 @@ class LTE_Test:
         else:
             self.CABLEWarning.config(fg = 'red')            
         
+
         
-        
+    #Sets the variable to default values
+    #Runs the LTE Test Script
+    def setDefaults(self):
+       
+        with open ("miniUT.setup", 'rb') as file:
+            data = json.load(file)
+            self.HOSTText.set(data["DEFAULT_HOST"])
+            self.CABLEText.set(data["DEFAULT_CABLE_LOSS_DB"])
+            self.SNText.set(data["DEFAULT_SN"])
+
+
+
+    #Sets the variable to previous  values
+    #Runs the LTE Test Script
+    def setPrevious(self):
+       
+        with open ("miniUT.setup", 'rb') as file:
+            data = json.load(file)
+            self.HOSTText.set(data["HOST"])
+            self.CABLEText.set(data["CABLE_LOSS_DB"])
+            self.SNText.set(data["SN"])
+
+
+
+    #Sets the variable to default values
     #Runs the LTE Test Script
     def test(self):
- 
+
+        """
         global RESULT
         
         #Disable button during test run
@@ -193,6 +227,7 @@ class LTE_Test:
         #Add button after test is finished
         self.testBtn.grid()
 
+        """
 RESULT = 0
 num_of_tests = 0
 num_of_passes = 0        
