@@ -83,18 +83,18 @@ OFF = False
 RELAY_1 = 0x01
 
 #Set this value to True if you want more debug statements
-DEBUG = False
+DEBUG = ""
 
 #Set this value to True if you want to do step by step testing
-STEP_TEST = False
+STEP_TEST = ""
 
 #Set this value to True if you want to log the output to console
-LOGGING = True
+LOGGING = ""
 LOG_FILE = "test_miniUT_shortened.log"
 
 #Set this valeu to True if you want to perform a check against
 #desired specifications
-SPEC_CHECK = True
+SPEC_CHECK = ""
 
 #Error Values
 FREQ_ERROR = 100000
@@ -856,6 +856,10 @@ def main():
     global HOST
     global SN
     global CABLE_LOSS_DB
+    global DEBUG
+    global STEP_TEST
+    global LOGGING
+    global SPEC_CHECK
     with open (SETUP, 'rb') as file:
         
         data = json.load(file)
@@ -863,6 +867,11 @@ def main():
         CABLE_LOSS_DB = data["CABLE_LOSS_DB"]
         SN = data["SN"]
         rb_and_scale = data["rb_and_scale"]
+
+        DEBUG = data["DEBUG"]
+        STEP_TEST = data ["STEP_TEST"]
+        LOGGING = data["LOGGING"]
+        SPEC_CHECK = data["SPEC_CHECK"]
         file.close()
         
     print ("\nRunning miniUT test...\n")

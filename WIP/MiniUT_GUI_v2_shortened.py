@@ -23,14 +23,16 @@ class LTE_Test:
         self.master = master
         titleFont = tkFont.Font(family = "arial", size = 18, weight = tkFont.BOLD)
         self.bodyFont = tkFont.Font (family = "arial", size = 10)
-        Title = Label(master, text="MiniUT PCBA ATS\nEnter key values", font = titleFont )
+        Title = Label(master, text="MiniUT PCBA ATE\nEnter key values", font = titleFont )
         Title.grid(row = 0, column = 0, columnspan = 4)
         
         #Create a menu
         menubar = Menu (master)
         menubar.add_command (label = "Exit", command = self.master.quit)
         menubar.add_command (label = "Set Default Values", command = self.setDefaultValues)
+        menubar.add_command (label = "Settings", command = self.settings)
         self.master.config(menu=menubar)
+        
         
         #Run test button
         self.testBtn = Button(master, text="Run Test", command=self.test)
@@ -97,28 +99,28 @@ class LTE_Test:
         
         #Set test button
         self.setDefaultBtn = Button(newWindow, text="Set Values", command=self.setDefaults)
-        self.setDefaultBtn.grid(row = 4, column = 0, pady=10)
+        self.setDefaultBtn.grid(row = 4, column = 1, pady=10)
   
         #Exit button
         self.ExitBtn = Button(newWindow, text="Exit", command= newWindow.destroy)
-        self.ExitBtn.grid(row = 4, column = 1, pady=10)
+        self.ExitBtn.grid(row = 4, column = 2, pady=10)
         
         #Labels and Text for SN and HOST
         HOSTSet = Label (newWindow, text = "HOST: ", font = self.bodyFont)
         HOSTSet.grid(row = 1, column = 0)
         SNSet = Label (newWindow, text = "SN: ", font = self.bodyFont)
-        SNSet.grid(row = 3, column = 0, pady=30)
+        SNSet.grid(row = 3, column = 0)
         CABLESet = Label (newWindow, text = "CABLE LOSS (in DB)", font = self.bodyFont)
         CABLESet.grid(row = 2, column = 0)
         
         self.HOSTSetWarning = Label (newWindow, text = "Enter numbers and '.' only",
-                            fg = self.master.cget('bg'), font = self.bodyFont)
+                            fg = newWindow.cget('bg'), font = self.bodyFont)
         self.HOSTSetWarning.grid(row = 1, column = 2)  
         self.CABLESetWarning = Label (newWindow, text = "Enter numbers",
-                           fg = master.cget('bg'), font = self.bodyFont)
+                           fg = newWindow.cget('bg'), font = self.bodyFont)
         self.CABLESetWarning.grid(row = 2, column = 2) 
         self.SNSetWarning = Label (newWindow, text = "Enter numbers or letters",
-                           fg = master.cget('bg'), font = self.bodyFont)
+                           fg = newWindow.cget('bg'), font = self.bodyFont)
         self.SNSetWarning.grid(row = 3, column = 2) 
             
         self.HOSTSetText = StringVar()
@@ -141,14 +143,90 @@ class LTE_Test:
         
         #Entry for SN
         SNSetEntry = Entry(newWindow, textvariable = self.SNSetText)
-        SNSetEntry.grid (row = 4, column = 1, pady=30)    
+        SNSetEntry.grid (row = 3, column = 1)    
 
         #Entry for CABLE_LOSS
         CABLESetEntry = Entry(newWindow, textvariable = self.CABLESetText)
-        CABLESetEntry.grid (row = 2, column = 1)           
+        CABLESetEntry.grid (row = 2, column = 1)  
+        
+        #Sets default values
+        #Runs the LTE Test Script
+        def setDefaults(self):
+           
+            with open ("miniUT.setup", 'rb') as file:
+                data = json.load(file)
+                data["DEFAULT_HOST"] = self.HOSTSetText.get()
+                data["DEFAULT_CABLE_LOSS_DB"] = self.CABLESetText.get()
+                data["DEFAULT_SN"] = self.SNSetText.get()
+                file.close()
+                
+            with open ("miniUT.setup", 'wb') as file:
+                json.dump (data, file)
+                file.close()        
         
         
         
+    def settings(self):
+        newWindow = Toplevel (root)
+        newWindow.wm_title("Settings")
+        
+        #Exit button
+        self.ExitBtn = Button(newWindow, text="Exit", command= newWindow.destroy)
+        self.ExitBtn.grid(row = 5, column = 1, pady=10)
+   
+        """
+        DEBUG = int(data["DEBUG"])
+        STEP_TEST = int(data ["STEP_TEST"])
+        LOGGING = int(data["LOGGING"])
+        SPEC_CHECK = int(data["SPEC_CHECK"])
+        self.debugVal = BooleanVar()
+                gainEnable = Checkbutton (master, text = "Enable Custom Gain Range", variable = self.gainVal,
+                     command = lambda v = self.gainVal, s = self.start_Gain_Entry, e = self.end_Gain_Entry:
+                     self.naccheck (v,s,e))
+        """
+        
+        #Labels and Text for SN and HOST
+        self.debugVal = BooleanVar()
+        self.debugVal.set(False)
+        DebugEnable = Checkbutton (newWindow, text = "Enable Debugging\n(Warning: Very Slow Runtime)",
+                                   variable = self.debugVal,
+                                   command = lambda v = self.debugVal, k = "DEBUG": self.setSetting(v,k))
+        DebugEnable.grid(row = 0, column = 0)
+        
+        self.stepVal = BooleanVar()
+        self.stepVal.set(False)
+        StepEnable = Checkbutton (newWindow, text = "Enable iterative stepping\n during sweep",
+                                   variable = self.stepVal,
+                                   command = lambda v = self.stepVal, k = "STEP_TEST": self.setSetting(v,k))
+        StepEnable.grid(row = 1, column = 0)
+
+        self.loggingVal = BooleanVar()
+        self.loggingVal.set(True)
+        LoggingEnable = Checkbutton (newWindow, text = "Enable logging",
+                                   variable = self.loggingVal,
+                                   command = lambda v = self.loggingVal, k = "LOGGING": self.setSetting(v,k))
+        LoggingEnable.grid(row = 2, column = 0)
+
+        self.specVal = BooleanVar()
+        self.specVal.set(True)
+        SpecEnable = Checkbutton (newWindow, text = "Enable specification check",
+                                   variable = self.specVal,
+                                   command = lambda v = self.specVal, k = "SPEC_CHECK": self.setSetting(v,k))
+        SpecEnable.grid(row = 3, column = 0)
+           
+
+        def setSetting (self, var, key):
+            with open ("miniUT.setup", 'rb') as file:
+                data = json.load(file)
+                data[key] = var
+                file.close()
+                
+            with open ("miniUT.setup", 'wb') as file:
+                json.dump (data, file)
+                file.close()
+            
+            
+            
     #Restricts the input of the COM and SN to valid inputs
     def validateSet (self, *dummy):
         
@@ -201,23 +279,6 @@ class LTE_Test:
             self.CABLEWarning.config(fg = self.master.cget('bg'))
         else:
             self.CABLEWarning.config(fg = 'red')            
-    
-    
-
-    #Gets default values
-    #Runs the LTE Test Script
-    def setDefaults(self):
-       
-        with open ("miniUT.setup", 'rb') as file:
-            data = json.load(file)
-            data["DEFAULT_HOST"] = self.HOSTText.get()
-            data["DEFAULT_CABLE_LOSS_DB"] = self.CABLEText.get()
-            data["DEFAULT_SN"] = self.SNText.get()
-            file.close()
-            
-        with open ("miniUT.setup", 'wb') as file:
-            json.dump (data, file)
-            file.close()
     
     
     
@@ -337,6 +398,6 @@ num_of_passes = 0
 root = Tk( )
 root.state('zoomed')
 #root.geometry ("700x600")
-root.title("MiniUT PCBA ATS")
+root.title("MiniUT PCBA ATE")
 lte = LTE_Test(root)
 root.mainloop( )
