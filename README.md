@@ -1,4 +1,4 @@
-### Sigma
+### Sigma Designs
 ### Author: Brian Han
 ### Date Created: July 10, 2017
 ### Last Updated: August 11, 2017
@@ -6,9 +6,14 @@
 # README
 
 - This repo contains all the test scripts at my time at Sigma Designs.
-- These scripts automate testing Sigma chips, using Litepoint as the
-primary testing system, with other components integrated in later.
-- "WIP" is where the various iterations of my scripts are located.
+- These scripts automate testing LTE for Sigma chips, using Litepoint
+as the primary testing system, with other components integrated in later.
+- "WIP" is where the various iterations of my scripts are located, including
+the latest version and the scripts described in the "Documentation for Relevant
+Scripts" section below.
+- "shortened" contains a working GUI and testing script; is the
+precursor to the following...
+- "test_MiniUT_PCBA_ATE" is the version of the GUI and testing script sent out.
 - If you wish to trace the progress of the script over time, view
 the CHANGELOG.md located in the "WIP" folder.
 - "Sample-Code" is the starter code provided by Sirius Ding at
@@ -112,3 +117,10 @@ Litepoint's provided GUI)
 - The script DOES NOT set up the CSW (crystal) or automate the power supply
 - You can customize the DUT setup with the global variables at the top of the
 script.
+
+## setup_generation.py
+
+- This is used to generate the miniUT.setup file used by test_miniUT_v2_shortened
+to set up the test.
+- There are directions in the file on how to read it and make adjustments.
+- Included in case of accidental destruction of the current miniUT.setup file 
