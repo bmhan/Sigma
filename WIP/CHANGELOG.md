@@ -7,9 +7,36 @@
 All version changes from file to file is documented here.
 Files are listed from newest to oldest order, descending by section
 
-## GUIs
+***************************************************************************
+***************************************************************************
+***************************************************************************
 
-## MiniUT_GUI_Black_wiht_subprocess_old_copy
+# GUIs
+
+## MiniUT_GUI_v2_shortened.py
+### Added
+- Menu bar, with 4 features: exit, set default values, settings,
+update firmware
+- exit is self-explanatory
+- set default values allow user to set what the default button sets the
+default values as
+- settings enable special debugging features and print statements
+- update firmware updates the firmware on the board; this feature is
+currently commented out; uncomment to use
+
+### Change
+- Small adjustments made to the GUI appearance
+
+
+## MiniUT_GUI_shortened
+### Added
+- Runs script test_miniUT_shortened.py
+- Button resets input values to default
+- Button resets input values to previous test values
+- CABLE LOSS and HOST input added to account for loss in dB and getting
+the connection to the Litepoint machine respectively
+
+## MiniUT_GUI_Black_with_subprocess_old_copy
 ### Added
 - Update of MiniUT_GUI_Black
 
@@ -54,8 +81,38 @@ so program hangs while the script is running
 - Not recommended for use
 
 ***************************************************************************
+***************************************************************************
+***************************************************************************
 
-## Test Scripts
+# Test Scripts
+
+## test_miniUT_v2_shortened
+### Added
+- Latest Version of Test Script
+- 
+
+### Changed
+- Specification check put back in
+- Reads more values from miniUT.setup
+
+## test_miniUT_shortened
+### Added
+- 'low power mode' test is properly implemented
+- Implemented test_sweep_0_1f logic for finding CSW
+- Now reads some values from miniUT.setup
+
+### Changed
+- Test is reduced back to only sweeping RB then gain
+
+### Removed
+- Specification Check is commented out, waiting until values are finalized.
+
+## test_miniUT_HH_RB_PA_E3648
+### Changed
+- Implemented a cleaner way to write the .csv file
+
+### Removed
+- No longer setting fine gain with 'wr 242 4444'
 
 ## modified_test_miniUT_HH_RB_PA_E3648A
 ### REDACTED SCRIPT; DO NOT USE
@@ -200,6 +257,8 @@ testing script
 - Provided by Sirius Ding
 
 ***************************************************************************
+***************************************************************************
+***************************************************************************
 
 ## Example_05192017 Files provided by Sirius
 
@@ -240,6 +299,8 @@ connection
 - Added correct local HOST to communciate with Sigma's Litepoint machine
 - Added optional debug statements and error return logic
 
+***************************************************************************
+***************************************************************************
 ***************************************************************************
 
 ## My Personal Short Test Scripts
