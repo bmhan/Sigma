@@ -1,7 +1,7 @@
 ### Sigma
 ### Author: Brian Han
 ### Date Created: July 10, 2017
-### Last Updated: August 10, 2017
+### Last Updated: August 11, 2017
 
 # README
 
@@ -49,7 +49,7 @@ of the testing script, as well as all the installations needed first.
 
 ## test_miniUT_v2_shortened.py
 
-    This is the latest version of the testing script. The test sweeps nRB and
+This is the latest version of the testing script. The test sweeps nRB and
 gain. miniUT.setup file is the configuration file for this script. The logic
 for this script is as follows:
 - Find the GPIB port used for the power supply (Agilent 6631B) and set voltage
@@ -65,7 +65,7 @@ the desired range.
 
 ## MiniUT_GUI_v2_shortened.py
 
-    This is the GUI for the test_miniUT_v2_shortened.py script. The GUI
+This is the GUI for the test_miniUT_v2_shortened.py script. The GUI
 expects user to enter three key inputs:
 - The HOST IP address to establish a connection to Litepoint
 - The CABLE LOSS in dB from the cable to properly calculate the average
@@ -94,7 +94,7 @@ must be set using global variables found at the top of the script.
 SCPI commands to program E3648A are not the same for 66311B (check out
 test_66311B.py and test_3648A.py to see the differences).
 
-    This script is the one used for overnight testing (as it takes upwards of
+This script is the one used for overnight testing (as it takes upwards of
 7 - 8 hours), as it sweeps 5 sets of values: The PA High Power / Low Power mde,
 The PA Bias, The PA VCC, nRB, and gain. The script sweeps the values in that 
 order, gain being the innermost value swept first.
