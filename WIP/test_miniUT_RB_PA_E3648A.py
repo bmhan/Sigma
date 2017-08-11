@@ -733,7 +733,7 @@ def main():
     power_supply = setup_PS()
 
     check_current_leakage(power_supply)
-    """    
+    
     if power_supply == PS_ERROR:
         print (PS_ERROR_MESSAGE)
         print ("Turning off output...")
@@ -966,7 +966,7 @@ def main():
         
     
     return SUCCESS
-    """
+    
 
     
 """ 

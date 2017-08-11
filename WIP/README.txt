@@ -107,3 +107,14 @@
     http://www.ni.com/download/ni-visa-17.0/6646/en/
     http://www.ni.com/download/ni-488.2-17.0/6627/en/
     
+    
+    
+-HOW TO RUN-
+    1) Make sure all the given files are in the same directory.
+    2) Double Click on MiniUT_GUI_shortened.py to run the GUI
+    3) Input the key values. If you do not satisfy these inputs, the program
+       will not allow you to run the test
+    4) With the inputs satisfied, run the test
+    5) Wait for the test to finish; typically takes ~2 minutes
+    6) Repeat steps 3 - 5 as desired
+    

@@ -38,6 +38,7 @@ CSW = ""
 DUT = "miniUT Rev E8"
 SN = "10"
 INPUT_CSV = 'input_rb_hex.csv'
+INPUT_SPEC = 'input_spec.txt'
 GAIN_START = 4
 GAIN_STOP = 70
 BLOCK_READ_SIZE = 1024
