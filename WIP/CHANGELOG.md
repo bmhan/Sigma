@@ -305,6 +305,11 @@ connection
 
 ## My Personal Short Test Scripts
 
+## miniUT_setup_file_generation.py
+### Added
+- Initializes the miniUT.setup JSON file
+- Instructions included on how to read and process the JSON file
+
 ## test_Visa
 ### Added
 - Sweeps the list of devices connected to the PC through USB, GPIB, etc.
