@@ -107,7 +107,7 @@ so program hangs while the script is running
 ### Removed
 - Specification Check is commented out, waiting until values are finalized.
 
-## test_miniUT_HH_RB_PA_E3648
+## test_miniUT_sweep_five_values
 ### Changed
 - Implemented a cleaner way to write the .csv file
 
@@ -122,6 +122,7 @@ so program hangs while the script is running
 
 ### Changed
 - Not a direct upgrade over the previous script; serves a different purpose
+
 ## test_miniUT_RB_PA_E3648A
 ### IMPORTANT NOTE
 - The 'low power mode' measurement is not implemented correctly
