@@ -6,8 +6,11 @@
 #
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
 # test_5C4_5BC_version configures the Litepoint IQxstream machine to analyze the
-# 782 MHz produced by the board.  The program sweeps values for the 5c4 and 5bc
-# registers from the TX_Power_Control Excel Doc. The program uses the
+# 782 MHz produced by the board.  
+# 
+# The program sweeps values for the 5c4 and 5bc for nRB of 1.
+# 
+#registers from the TX_Power_Control Excel Doc. The program uses the
 # socket_interface.py to initialize a connection to the board and send and
 # receive data from IQxstream. The serial library is used to communicate to the
 # board for testing. The result of the test is printed to terminal, and stored 

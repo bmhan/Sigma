@@ -6,7 +6,10 @@
 #
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
 # test_gain_rb_version configures the Litepoint IQxstream machine to analyze the
-# 782 MHz produced by the board, sweeping the rb values and the gain values. 
+# 782 MHz produced by the board, 
+#
+# The program sweeps the rb values and then the gain values. 
+# 
 # The program begins by prompting the user for a range of gain values to test.
 # The program reads in the input_rb_hex.csv file, reading in the hex value and the
 # rb value.

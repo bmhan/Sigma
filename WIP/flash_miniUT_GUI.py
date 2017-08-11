@@ -4,9 +4,9 @@
 # Created:     8/3/2017
 # Last Updated: 8/3/2017
 #
-# Here are some relevant links:
-# How to send the file (workaround...)
-# https://stackoverflow.com/questions/34299777/send-file-over-serial-port-from-python
+# GUI with function to flash the miniUT using the COM specified in the variable.
+# If the flash does not work, try again, and make sure that you have the right
+# COM for the DUT.
 # -----------------------------------------------------------------------------
 
 import serial

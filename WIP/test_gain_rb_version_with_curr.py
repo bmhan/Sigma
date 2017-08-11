@@ -1,13 +1,16 @@
 # -----------------------------------------------------------------------------
-# Name:        test_rb_and_rb_offset_version
+# Name:        test_gain_rb_version_with_curr
 # Purpose:     Get the TXQuality data, sweeping the gains for an rb and rb offset
 # Created:     7/19/2017
 # Last Updated: 7/18/2017
 #
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
 # test_gain_rb_version configures the Litepoint IQxstream machine to analyze the
-# 782 MHz produced by the board, sweeping the rb values and the gain values. 
-# The program begins by prompting the user for a range of gain values to test.
+# 782 MHz produced by the board, 
+#
+# The program sweeps the rb values and the gain valuues, beginning by prompting
+# the user for a range of gain values to test.
+# 
 # The result of the test is printed to terminal, and is stored in two .csv files -
 # a sorted and unsorted .csv file
 # The program uses the socket_interface.py to initialize

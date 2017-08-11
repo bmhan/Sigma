@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Name:        test_miniUT_RB_PA_E3648A
+# Name:        simple_RB_PA_test
 # Purpose:     Get the TXQuality data, sweeping the PA mode, PA bias, PA vcc,
 #              RB, and the Gain.
 # Created:     8/3/2017
@@ -7,6 +7,7 @@
 #
 # Simple Tera Term-like testing script; does not have crystal calibration 
 # does not store the result; purely for Litepoint observation
+# Set the global variables as you desire, and run the script
 # -----------------------------------------------------------------------------
 
 import serial

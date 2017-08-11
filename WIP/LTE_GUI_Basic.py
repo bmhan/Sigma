@@ -4,13 +4,13 @@
 # Created:     7/24/2017
 # Last Updated: 7/25/2017
 #
-# A grey box testing GUI that uses our testing script
+# A grey box testing GUI that uses test_miniUT_RB_PS_66311B as the testing script
 # -----------------------------------------------------------------------------
 from Tkinter import *
 import test_miniUT_RB_PS_66311B as tester
 import tkFont
 RESULT = False
-FREQ_ERROR = 100000
+
 
 class LTE_Test:
     def __init__ (self, master):
@@ -104,6 +104,7 @@ class LTE_Test:
     #Runs the LTE Test Script
     def test(self):
 
+        
         #Logic for Debugging
         print self.debugVal.get()
         if self.debugVal.get() == 1:

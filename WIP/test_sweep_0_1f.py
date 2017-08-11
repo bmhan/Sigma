@@ -1,20 +1,17 @@
 # -----------------------------------------------------------------------------
-# Name:        test_miniUT_crystal_rb
+# Name:        test_sweep_0_1f
 # Purpose:     Get the TXQuality data, sweeping the gains for an rb and rb offset
 # Created:     7/24/2017
-# Last Updated: 7/24/2017
+# Last Updated: 8/11/2017
 #
 # CHANGE SN BEFORE EVERY TEST!!!
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
-# test_miniUT_crystal_rb configures the Litepoint IQxstream machine to analyze the
-# 782 MHz produced by the board, sweeping the rb values and the gain values. 
-# The program begins by calibrating the CSW 
-# The program begins by prompting the user for a range of gain values to test.
-# The result of the test is printed to terminal, and is stored in two .csv files -
-# a sorted and unsorted .csv file
-# The program uses the socket_interface.py to initialize
-# a connection to the board and send and receive data from IQxstream. The serial
-# library is used to communicate to the board for testing.
+# NOTE: This test can be further optimized by reducing time.sleep commands and/or
+# reducing the timeout (in seconds) of the pySerial object on creation
+# as reducing the number of reads from the DUT.The less reads the faster the program
+# runs
+#
+# This program sweeps the CSW values to optimize the crystal.
 # -----------------------------------------------------------------------------
 import socket_interface as scpi
 import serial
@@ -33,7 +30,7 @@ fieldnames = [
 "ACLR E-UTRA Lower (dB)", "ACLR E-UTRA Upper (dB)", "Current (A)"]
 HOST = '10.10.14.202'
 PORT = 24000
-COM = 'COM8'
+COM = 'COM14'
 VSA_FREQ = 782e6
 CABLE_LOSS_DB = 11
 VOLT = 2.5 #TODO CHANGE
@@ -51,20 +48,23 @@ CSV = "RB_50_miniUT_11_Sweep_crystal.csv"
 INPUT_CSV = 'input_rb_hex.csv'
 GAIN_START = 4
 GAIN_STOP = 70
-BLOCK_READ_SIZE = 1024
+BLOCK_READ_SIZE = 512
 RB = 50
 HEX = 1758
 table = [0,1,2,3,4,5,10,20,30,40,50,60,70]
-#freq_array = ['1f','1e', '1d', '1c', '1b', '1a', '19', '18', '17', '16', '15', '14', '13', '12', '11', '10',
-#              'f','d','e','c','b','a', '9', '8', '7', '6', '5', '4', '3', '2', '1', '0']
+NUM_OF_RETEST = 0
+MAX_RETESTS = 5
+
 freq_array = ['0','1','2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', '10', '11', '12',
                '13', '14', '15', '16', '17', '18', '19', '1a', '1b', '1c', '1d', '1e', '1f']
-CSW_CENTER = '9'
 #freq_array = ['f','e','d','c','b','a']
+
+               
+# Important centered value to run the optimized CSW find               
+CSW_CENTER = '9'
 
 #Set this value to True if you want more debug statements
 DEBUG = False
-
 
 
 
@@ -203,9 +203,30 @@ def measure_tx(crystal,rb, hex, gain, rb_offset,power_supply):
     result_dict['Current (A)'] = round(float(current),2)
     #result_dict['Date & Time'] =  datetime.datetime.strftime(
     #datetime.datetime.now(), '%m/%d/%Y  %H:%M:%S')  
+    
+    global NUM_OF_RETEST
+    global MAX_RETESTS
+    
+    #In the case of calculation failure
+    if ((int(power_arr[0]) != 0 or int(txq_array[0]) != 0 or int(aclr_array[0]) != 0)):
+        print "Power calculation error code:\t" + power_arr[0]
+        print "TXQ calculation error code:\t" + txq_array[0]
+        print "SPEC calculation error code:\t" + aclr_array[0]
+        
+        #Attempt to redo the test up to MAX_RETESTS number of times
+        if (NUM_OF_RETEST < MAX_RETESTS):
+            scpi.close()
+            setup_connection()
+            NUM_OF_RETEST += 1
+            print "\nRetest number " + str(NUM_OF_RETEST) + "...\n"
+            return measure_tx(crystal, rb, hex, gain, rb_offset,power_supply)
+        return CALC_ERROR   
+    
+    NUM_OF_RETEST = 0        
     return result_dict
     
 
+    
 """
 Function sets up socket connection to the IQxstream
 """
@@ -234,20 +255,29 @@ Function sets up the DUT to transmit the signal
 def setup_DUT():
 
     #Establish connection to DUT
-    ser = serial.Serial(COM, 115200, timeout = 5)
+    ser = serial.Serial(COM, 115200, timeout = 0.7)
     
     print ("\n Enable debug messages if firmware requires...\n")
     ser.write ("log 2\n")
-    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+    if DEBUG == True:
+        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
     
     print ("\nInitializing DUT...\n")
     ser.write("d 9\n")
-    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
     
+    if DEBUG == True:
+        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+    else:
+        time.sleep (0.1)
+    
+    time.sleep (1)
     print ("Tx...\n")
     ser.write("d 20\n")
-    print("DUT response: " + ser.read(BLOCK_READ_SIZE))
-	
+    if DEBUG == True:
+        print("DUT response: " + ser.read(BLOCK_READ_SIZE))
+    else:
+        time.sleep (0.7)
+
     #Setting up 2c0 (crystal)
     print ("Setting up 2c0 (crystal)...\n")
     CSW = setup_crystal(ser)
@@ -277,17 +307,17 @@ def setup_crystal(ser):
     data_curr = EVM_LIMIT
     freq_char = ''
     
-    if (DEBUG == True):
-        print("Sending PUSCH signal for crystal ...\n")
+    print("Sending PUSCH signal for crystal ...\n")
     ser.write("d 35 " + str(RB) + " 0 " + str(HEX) + "\n")
-    print("DUT response: " + ser.read(BLOCK_READ_SIZE))   
+    #print("DUT response: " + ser.read(BLOCK_READ_SIZE))   
+
     
     ####################################################################
     #Logic to test for the optimal CSW quickly (four - test process)
 
-    print ("Writing 2c0 "+ str(CSW_CENTER) + "28...\n")
+    print ("Writing and checking 2c0 "+ str(CSW_CENTER) + "28...\n")
     ser.write("wr 2c0 " + str(CSW_CENTER) + "28\n")
-    print("DUT response: " + ser.read(BLOCK_READ_SIZE))	 
+    #print("DUT response: " + ser.read(BLOCK_READ_SIZE))	 
 
     #Perform the calculation, look at the center data evm and freq error
     tx_results = measure_tx(CSW_CENTER,0,0,16,0,0)
@@ -302,7 +332,7 @@ def setup_crystal(ser):
     freq_char = CSW_CENTER
     
     #Check if the center is our value
-    if (abs(freq_curr) < FREQ_ACC and data_curr < EVM_LIMIT):
+    if (abs(freq_curr) < FREQ_ACC and int(data_curr) < EVM_LIMIT):
         return freq_char
         
     #Performs another check based off FREQ_DELTA seen in data
@@ -312,7 +342,7 @@ def setup_crystal(ser):
         freq_offset = int(freq_curr / FREQ_DELTA)
         freq_char = freq_array[int(freq_array.index(CSW_CENTER) + freq_offset)]    
 
-        print ("Writing 2c0 "+ str(freq_char) + "28...\n")
+        print ("Writing and checking 2c0 "+ str(freq_char) + "28...\n")
         ser.write("wr 2c0 " + str(freq_char) + "28\n")
         if (DEBUG == True):
             print("DUT response: " + ser.read(BLOCK_READ_SIZE))	 
@@ -334,7 +364,7 @@ def setup_crystal(ser):
             freq_offset = 1 if freq_curr > 0 else -1
             freq_char = freq_array[int(freq_array.index(freq_char) - freq_offset)]    
 
-            print ("Writing 2c0 "+ str(freq_char) + "28...\n")
+            print ("Writing and checking 2c0 "+ str(freq_char) + "28...\n")
             ser.write("wr 2c0 " + str(freq_char) + "28\n")
             if (DEBUG == True):
                 print("DUT response: " + ser.read(BLOCK_READ_SIZE))	 
@@ -356,7 +386,7 @@ def setup_crystal(ser):
                 freq_offset = -2 if freq_curr > 0 else 2
                 freq_char = freq_array[int(freq_array.index(freq_char) - freq_offset)]    
 
-                print ("Writing 2c0 "+ str(freq_char) + "28...\n")
+                print ("Writing and checking 2c0 "+ str(freq_char) + "28...\n")
                 ser.write("wr 2c0 " + str(freq_char) + "28\n")
                 if (DEBUG == True):
                     print("DUT response: " + ser.read(BLOCK_READ_SIZE))	 
@@ -376,7 +406,7 @@ def setup_crystal(ser):
     if abs(freq_curr) > FREQ_ACC:
         for CSW_XOSC in freq_array:
             if (DEBUG == True):
-                print ("Writing 2c0 "+ str(CSW_XOSC) + "28...\n")
+                print ("Writing and checking 2c0 "+ str(CSW_XOSC) + "28...\n")
             ser.write("wr 2c0 " + str(CSW_XOSC) + "28\n")
             if (DEBUG == True):
                 print("DUT response: " + ser.read(BLOCK_READ_SIZE))	
@@ -410,24 +440,87 @@ def setup_crystal(ser):
         
         
 def setup_PS():
+    
+    """
+    #Optional Logic, in case you want to switch which power
+    #supply you are currently using
     #Setting up the Power Supply
+    choose_PS = raw_input ("Which power supply are you using?" +
+                       " Type in '66311B' or 'E3648A'\n")
+    
+    while True:
+        if choose_PS == 'E3648A':
+            print "Setting up E3648A power supply..."
+            rm = visa.ResourceManager()
+            power_supply = rm.open_resource('GPIB0::9::INSTR')
+            
+            #Turning off output
+            print ("Turning off output...")
+            power_supply.write(":OUTPUT:STATE OFF")
+            time.sleep(1)
+            
+            #Setting output 1
+            print ("Setting output 1...")
+            power_supply.write(":INSTrument:SELect OUT1")
+            time.sleep(0.1)
+            
+            #Setting Power Supply current and limit
+            power_supply.write(":APPL %f, %f" % (VOLT, CURR_LIMIT))
+            time.sleep(0.1)
+            
+            #Turning on output
+            print ("Turning off output...")
+            power_supply.write(":OUTPUT:STATE ON")
+            time.sleep(1)
+            
+            break
+        
+        elif choose_PS == '66311B':
+            print "Setting up 66311B power supply..."
+            #Turning off output
+            rm = visa.ResourceManager()
+            power_supply = rm.open_resource('GPIB0::4::INSTR')
+            
+            print ("Turning off PS output...\n")
+            power_supply.write("OUTP OFF")
+            time.sleep(1)
+            
+            print ("Setting the voltage...\n")
+            power_supply.write("VOLT " + str(VOLT) + "\n")
+            time.sleep(0.1)
+            
+            print ("Setting the current to low current...\n")
+            power_supply.write("CURR " + str(CURR_LIMIT) + "\n")
+            time.sleep(0.1)
+            
+            print ("Turning on PS output...\n")
+            power_supply.write("OUTP ON")
+            time.sleep(1)
+            
+            break
+            
+        else:
+            choose_PS = raw_input ("Try input again...")
+    """
+    print "Setting up 66311B power supply..."
+    #Turning off output
     rm = visa.ResourceManager()
-    power_supply = rm.open_resource('GPIB0::9::INSTR')
+    power_supply = rm.open_resource('GPIB0::4::INSTR')
     
-    #Setting output 1
-    print ("Setting output 1...")
-    power_supply.write(":INSTrument:SELect OUT1")
+    print ("Turning off PS output...\n")
+    power_supply.write("OUTP OFF")
+    
+    print ("Setting the voltage...\n")
+    power_supply.write("VOLT " + str(VOLT) + "\n")
     time.sleep(0.1)
     
-    #Setting Power Supply current and limit
-    power_supply.write(":APPL %f, %f" % (VOLT, CURR_LIMIT))
+    print ("Setting the current to low current...\n")
+    power_supply.write("CURR " + str(CURR_LIMIT) + "\n")
     time.sleep(0.1)
     
-    #Turning on output
-    print ("Turning on output...")
-    power_supply.write(":OUTPUT:STATE ON")
+    print ("Turning on PS output...\n")
+    power_supply.write("OUTP ON")
     time.sleep(1)
-    
     return power_supply
     
     
@@ -482,10 +575,11 @@ def main():
     #Turning on output
     print ("Turning off output...")
     power_supply.write(":OUTPUT:STATE OFF")
-    time.sleep(1)
     
     """
-    #Optional statements that may be implemented
+    #Optional statements that may be implemented in
+    #setup_DUT() before calling setup_crystal() in the
+    #function body
     mode = '7c'
     print("Setting PA_Mode...\n")
     ser.write("rffe_wrreg f 0 " + mode + "\n")        

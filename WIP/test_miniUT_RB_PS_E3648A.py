@@ -7,7 +7,11 @@
 # CHANGE SN BEFORE EVERY TEST!!!
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
 # test_miniUT_crystal_rb configures the Litepoint IQxstream machine to analyze the
-# 782 MHz produced by the board, sweeping the rb values and the gain values. 
+# 782 MHz produced by the board.
+#
+# The program sweeps the rb values and the gain values, using the E3648A
+# power supply to measure the voltage and current
+# 
 # The program begins by calibrating the CSW 
 # The program begins by prompting the user for a range of gain values to test.
 # The result of the test is printed to terminal, and is stored in two .csv files -

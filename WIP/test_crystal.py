@@ -6,8 +6,11 @@
 #
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
 # test_crystal configures the Litepoint IQxstream machine to analyze the 782 MHz
-# produced by the board, sweeping the values 0 through 1f for the frequency set
+# produced by the board.
+#
+# The program sweeps the values 0 through 1f for the frequency set
 # in register 2c0.
+#
 # The program uses the socket_interface.py to initialize
 # a connection to the board and send and receive data from IQxstream. The serial
 # library is used to communicate to the board for testing. The visa library is used

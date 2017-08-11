@@ -6,7 +6,11 @@
 #
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
 # test_rb_version configures the Litepoint IQxstream machine to analyze the 782 MHz
-# produced by the board, sweeping the rb values. The result of the test is printed
+# produced by the board.
+#
+# This program sweeps the rb values.
+#
+# The result of the test is printed
 # to terminal, and is stored in two .csv files - test_rb_result.csv and the sorted
 # version test_rb_result_ordered.csv.
 # The program uses the socket_interface.py to initialize

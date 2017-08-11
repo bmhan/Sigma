@@ -1,20 +1,27 @@
 # -----------------------------------------------------------------------------
-# Name:        MiniUT_GUI_Black
+# Name:        test_miniUT_GUI
 # Purpose:     See if we can run our program using a Tkinter button...
-# Created:     7/25/2017
-# Last Updated: 7/26/2017
+# Created:     8/7/2017
+# Last Updated: 8/7/2017
 #
-# A black box testing GUI that uses test_miniUT_RB_PS_66311B_copy_9 as the script
+# GUI that can run a simple test and perform a calibration
+# DEPRECATED CODE - DO NOT RUN!!!
+# DEPRECATED CODE - DO NOT RUN!!!
+# DEPRECATED CODE - DO NOT RUN!!!
+# DEPRECATED CODE - DO NOT RUN!!!
+# DEPRECATED CODE - DO NOT RUN!!!
 # -----------------------------------------------------------------------------
 from Tkinter import *
-import test_miniUT_RB_PS_66311B_copy_9 as tester
+from threading import *
+import test_miniUT_shortened as tester
 import tkFont
 import time
 import os
 import re
-
 import sys
+
 class StdRedirector():
+    
     def __init__(self, text_widget):
         self.text_space = text_widget
 
@@ -23,6 +30,12 @@ class StdRedirector():
         self.text_space.insert("end", string)
         self.text_space.see("end")
         #self.text_space.config(state= DISABLED)
+      
+
+    #A class for redirecting stdout to this Text widget.
+    #def write(self,str):
+    #    self.text_box.write(str,False)
+
         
 class LTE_Test:
     def __init__ (self, master):
@@ -33,37 +46,24 @@ class LTE_Test:
         Title.grid(row = 0, column = 1)
         
         #Run test button
-        self.testBtn = Button(master, text="Run Test", command=self.test)
+        self.testBtn = Button(master, text="Run Test", command=self.run_test)
         self.testBtn.grid(row = 3, column = 1)
         
-        #Labels and Text for SN and COM
-        COMLabel = Label (master, text = "COM for MiniUT: (format is 'COM#')", font = self.bodyFont)
-        COMLabel.grid(row = 1, column = 0)
+        #Labels and Text for SN
         SNLabel = Label (master, text = "Please enter the Serial Number", font = self.bodyFont)
-        SNLabel.grid(row = 2, column = 0)
-        
-        self.COMWarning = Label (master, text = "Enter 'COM' followed by a digit",
-                            fg = self.master.cget('bg'), font = self.bodyFont)
-        self.COMWarning.grid(row = 1, column = 2, padx = 0)  
-        self.SNWarning = Label (master, text = "Enter numbers",
+        SNLabel.grid(row = 1, column = 0)
+         
+        self.SNWarning = Label (master, text = "Enter numbers or scan the barcode",
                            fg = master.cget('bg'), font = self.bodyFont)
-        self.SNWarning.grid(row = 2, column = 2) 
+        self.SNWarning.grid(row = 1, column = 2) 
         
-        self.COMText = StringVar()
-        self.COMText.set ("COM#")
-        self.COMText.trace('rw', self.validate)
         self.SNText = StringVar()
         self.SNText.trace('w', self.validate)
              
         
-        #Entry for MiniUT COM       
-        COMEntry = Entry(master, textvariable = self.COMText)
-        COMEntry.grid (row = 1,column = 1)
-
-        
         #Entry for SN
         SNEntry = Entry(master, textvariable = self.SNText)
-        SNEntry.grid (row = 2, column = 1)       
+        SNEntry.grid (row = 1, column = 1)       
 
 
         #Note: Need xterm
@@ -77,41 +77,31 @@ class LTE_Test:
         text_frame = Frame (master, width = 700, height = 300)
         text_frame.grid(row = 8, column = 0, columnspan = 3)
         #text_box = Text(master, state= DISABLED, height = 20, width = 80)
-        self.text_box = Text(text_frame, state= DISABLED, height = 20, width = 80, relief = "sunken")
+        self.text_box = Text(text_frame, state= NORMAL, height = 20, width = 80, relief = "sunken")
         self.text_box.grid (row = 0, column = 0, columnspan = 3)
         scroll_text = Scrollbar (text_frame, command = self.text_box.yview)
         scroll_text.grid(row=0, column=4, sticky='nsew')
         self.text_box['yscrollcommand'] = scroll_text.set
 
-        sys.stdout = StdRedirector(self.text_box)
-        sys.stderr = StdRedirector(self.text_box)
+        #sys.stdout = StdRedirector(self.text_box)
+        #sys.stderr = StdRedirector(self.text_box)
         #######################################################
         
     #Restricts the input of the COM and SN to valid inputs
     def validate (self, *dummy):
         
-        self.testBtn.config(state=(NORMAL if (re.match("^[0-9]*$", self.SNText.get())
-                                          and self.SNText.get()
-                                          and re.match("^(COM)[0-9]$", self.COMText.get()))
+        self.testBtn.config(state=(NORMAL if (re.match("^[0-9]*$", self.SNText.get()))
                             else DISABLED))  
-
-  
-                            
-        if (re.match("^(COM)[0-9]$", self.COMText.get())):
-            self.COMWarning.config(fg = self.master.cget('bg'))
-        else:
-            self.COMWarning.config(fg = 'red')
 
             
         if (re.match("^[0-9]*$", self.SNText.get()) and self.SNText.get()):
             self.SNWarning.config(fg = self.master.cget('bg'))
         else:
             self.SNWarning.config(fg = 'red')
-    
-    
+        
     #Runs the LTE Test Script
     def test(self):
-    
+        print "Done!"   
         #Disable button during test run
         self.testBtn.config(state = 'disabled')
         
@@ -127,12 +117,9 @@ class LTE_Test:
         
         startTime = time.time()
             
-        #Set the COM for the miniUT
-        tester.COM = self.COMText.get()
-        #print tester.COM
         
         #Logic for SN
-        #print self.SNText.get()
+        print self.SNText.get()
         tester.SN = self.SNText.get()
         
         testResult = Label (self.master, text = "Test is now running, please wait...", fg = 'blue', font = self.bodyFont)    
@@ -141,8 +128,23 @@ class LTE_Test:
         #Update window before script call
         self.master.update() 
         
+        """
         #Script call
+        #RESULT = tester.main()
+        #RESULT = self.run_tester
+        child = subprocess.Popen(['python','-u','test_miniUT_RB_PS_E3648A.py'], stdout = subprocess.PIPE)
+        #self.text_box.delete("1.0",END)
+        for line in iter(child.stdout.readline,''):
+            self.text_box.insert(INSERT, line)
+            self.text_box.see(END)
+            self.text_box.update_idletasks()
+        
+        child.stdout.close()
+        RESULT = child.wait()
+        """
         RESULT = tester.main()
+        
+        print RESULT
         
         #Success
         if RESULT == 0:
@@ -188,12 +190,7 @@ class LTE_Test:
             
         else:
             testResult.config(text = "Test failed", fg = 'red', font = self.bodyFont)        
-        """    
-        elif RESULT == tester.IMPORT_ERROR:
-            testResult.config(text = "Test failed", fg = 'red', font = self.bodyFont)
-            errorLabel = Label (self.master, text = tester.IMPORT_ERROR_MESSAGE, fg = 'red', font = self.bodyFont)
-            errorLabel.grid(row = 4, column = 1)            
-        """      
+    
         
         #Displaying the total number of tests passed over the total number of tests run
         testDone = Label (self.master, text = "Test(s) passed: " + str(num_of_passes) + "/"
@@ -202,6 +199,13 @@ class LTE_Test:
         
         #Enable button after test is finished
         self.testBtn.config(state = 'normal')
+        
+    def run_test (self):
+
+        t = Thread (target = self.test,args = ())
+        t.start()
+    
+
 
 RESULT = 1 
 num_of_tests = 0

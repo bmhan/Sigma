@@ -8,7 +8,6 @@
 # test_miniUT_shortened configures the Litepoint IQxstream machine to analyze the
 # 782 MHz produced by the board, sweeping the rb values and the gain values. 
 # The program begins by calibrating the CSW 
-# The program begins by prompting the user for a range of gain values to test.
 # The program uses the socket_interface.py to initialize
 # a connection to the board and send and receive data from IQxstream. The serial
 # library is used to communicate to the board for testing.
@@ -613,7 +612,6 @@ def setup_PS():
     #Turning off output
     print ("Turning off PS output...\n")
     power_supply.write("OUTP OFF")
-    time.sleep(1)
     
     print ("Setting the voltage...\n")
     power_supply.write("VOLT " + str(VOLT) + "\n")

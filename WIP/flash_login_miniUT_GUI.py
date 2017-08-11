@@ -1,12 +1,12 @@
 # -----------------------------------------------------------------------------
-# Name:        flash_miniUT_GUI
+# Name:        flash_login_miniUT_GUI
 # Purpose:     GUI to flash the miniUT
 # Created:     8/3/2017
 # Last Updated: 8/3/2017
 #
-# Here are some relevant links:
-# How to send the file (workaround...)
-# https://stackoverflow.com/questions/34299777/send-file-over-serial-port-from-python
+# GUI for flashing the miniUT with new firmware, but with a WIP log-in screen.
+# Log-in does not currently work; recommend you use flash_miniUT_GUI.py 
+# instead
 # -----------------------------------------------------------------------------
 
 import serial

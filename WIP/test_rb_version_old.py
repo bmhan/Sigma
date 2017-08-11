@@ -1,11 +1,11 @@
 # -----------------------------------------------------------------------------
-# Name:        test_rb_version
+# Name:        test_rb_version_old
 # Purpose:     Get the TXQuality data, sweeping the RB
 # Created:     7/13/2017
 # Last Updated: 7/14/2017
 #
 # NOTE: The program uses RF4A as the VSA port and STRM1A as the VSG port.
-# test_rb_version configures the Litepoint IQxstream machine to analyze the 782 MHz
+# test_rb_version_old configures the Litepoint IQxstream machine to analyze the 782 MHz
 # produced by the board, sweeping the rb values. The result of the test is printed
 # to terminal, and is stored in two .csv files - test_rb_result.csv and the sorted
 # version test_rb_result_ordered.csv.
