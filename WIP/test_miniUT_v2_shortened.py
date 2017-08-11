@@ -80,6 +80,9 @@ FAIL = 1
 ON = True
 OFF = False
 RELAY_1 = 0x01
+RELAY_2 = 0x02
+RELAY_3 = 0x04
+RELAY_4 = 0x08
 
 #Set this value to True if you want more debug statements
 DEBUG = ""
@@ -760,6 +763,9 @@ def check_current_leakage(power_supply) :
     
     #Turn the relay on for the low power mode
     print "\nTurning on the relay..."
+    setRelay( RELAY_2, OFF ) 
+    setRelay( RELAY_3, OFF )
+    setRelay( RELAY_4, OFF )    
     setRelay (RELAY_1, ON)
     time.sleep(1)
     
